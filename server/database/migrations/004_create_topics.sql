@@ -1,0 +1,7 @@
+CREATE TABLE topics (
+  topic_id SERIAL PRIMARY KEY,
+  topic_name VARCHAR(100) NOT NULL,
+  subject_id INT NOT NULL REFERENCES subjects(subject_id) ON DELETE CASCADE,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

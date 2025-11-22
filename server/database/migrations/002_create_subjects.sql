@@ -1,0 +1,7 @@
+CREATE TABLE subjects (
+  subject_id SERIAL PRIMARY KEY,
+  subject_name VARCHAR(100) NOT NULL UNIQUE,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
