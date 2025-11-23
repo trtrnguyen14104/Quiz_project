@@ -6,5 +6,6 @@ CREATE TABLE classes (
   subject_id INT NOT NULL REFERENCES subjects(subject_id),
   teacher_id INT NOT NULL REFERENCES users(user_id),
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active','archived','deleted')),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL

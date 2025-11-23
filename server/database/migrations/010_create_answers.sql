@@ -5,4 +5,6 @@ CREATE TABLE answers (
   is_correct BOOLEAN DEFAULT FALSE,
   answer_order INT NOT NULL,
   UNIQUE (question_id, answer_order)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

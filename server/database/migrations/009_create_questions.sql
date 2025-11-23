@@ -4,8 +4,10 @@ CREATE TABLE questions (
   content TEXT NOT NULL,
   image_url VARCHAR(500),
   question_order INT NOT NULL,
-  points NUMERIC(5,2) DEFAULT 1.00,
-  time_limit INT,
-  difficulty_level VARCHAR(20) CHECK (difficulty_level IN ('easy','medium','hard')),
+  points DECIMAL(5,2) DEFAULT 1.00,
+  time_limit INT DEFAULT 15,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
   UNIQUE (quiz_id, question_order)
 );
