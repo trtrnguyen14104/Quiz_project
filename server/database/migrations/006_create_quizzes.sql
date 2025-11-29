@@ -3,6 +3,7 @@ CREATE TABLE quizzes (
   title VARCHAR(200) NOT NULL,
   description TEXT,
   cover_image_url VARCHAR(500),
+  quiz_code VARCHAR(6) UNIQUE NOT NULL,
   subject_id INT NOT NULL REFERENCES subjects(subject_id),
   topic_id INT REFERENCES topics(topic_id) ON DELETE SET NULL,
   category_id INT REFERENCES quiz_categories(category_id) ON DELETE SET NULL,
@@ -12,5 +13,5 @@ CREATE TABLE quizzes (
   total_score DECIMAL(5,2) DEFAULT 0,
   status VARCHAR(20) DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
