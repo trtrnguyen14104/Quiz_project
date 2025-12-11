@@ -1,5 +1,5 @@
 import { pool } from "../config/database.js";
-const ClassQuizModel = {
+export const ClassQuizModel = {
   async findByClass(classId) {
     const result = await pool.query(
       `SELECT cq.*, q.title, q.description, q.quiz_code, q.difficulty_level, q.total_score
@@ -38,7 +38,7 @@ const ClassQuizModel = {
 
   async findByClassAndQuiz(classId, quizId) {
     const result = await pool.query(
-      'SELECT * FROM class_quizzes WHERE class_id = $1 AND quiz_id = $2',
+      "SELECT * FROM class_quizzes WHERE class_id = $1 AND quiz_id = $2",
       [classId, quizId]
     );
     return result.rows[0];
@@ -68,6 +68,8 @@ const ClassQuizModel = {
   },
 
   async delete(classQuizId) {
-    return pool.query('DELETE FROM class_quizzes WHERE class_quiz_id = $1', [classQuizId]);
-  }
+    return pool.query("DELETE FROM class_quizzes WHERE class_quiz_id = $1", [
+      classQuizId,
+    ]);
+  },
 };

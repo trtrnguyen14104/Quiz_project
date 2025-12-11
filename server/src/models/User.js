@@ -7,8 +7,6 @@ async findAll() {
         `SELECT user_id, user_name, email, avatar_url, role, is_verified, status, created_at FROM users WHERE status = $1`,
         ["active"]
     );
-    if(result.rowCount == 0) 
-        console.log("Danh sách Users rỗng");
     return result.rows;
     } catch (error) {
         console.error("lỗi find all users Model");
@@ -23,8 +21,6 @@ async findById(userId) {
     `SELECT user_id, user_name, email, avatar_url, role, is_verified, status, created_at FROM users WHERE user_id = $1`,
     [userId]
     );
-    if(result.rowCount == 0)
-        console.log("Không tìm thấy user");
     return result.rows[0];
     } catch (error) {
         console.error("lỗi find user by Id Model");
@@ -39,8 +35,6 @@ async findByEmail(email) {
     `SELECT * FROM users WHERE email = $1`,
     [email]
     );
-    if(result.rowCount == 0)
-        console.log("Không tìm thấy user");
     return result.rows[0]; 
     } catch (error) {
         console.error("lỗi find user by email Model");
@@ -58,8 +52,6 @@ async create(userData) {
         RETURNING user_id, user_name, email, role, created_at`,
         [user_name, email, password_hash, role]
         );
-        if(result.rowCount == 0)
-            console.log("Tạo user không thành công");
         return result.rows[0]; 
     } catch (error) {
         console.error("lỗi create user Model");
@@ -102,12 +94,20 @@ async update(userId, userData) {
 async delete (id){
     try {
         const result = await pool.query(`DELETE FROM users WHERE user_id = $1`,[id]);
-        if(result.rowCount == 0)
-            console.log("Tạo user không thành công");
         return result.rows[0];
     } catch (error) {
         console.error("lỗi delete user Model");
         throw error;
     }
-}
+},
+async createGoogleUser(userData) {
+  const { user_name, email, avatar_url } = userData;
+  const result = await pool.query(
+    `INSERT INTO users (user_name, email, password_hash, role, avatar_url, is_verified) 
+     VALUES ($1, $2, $3, $4, $5, $6) 
+     RETURNING user_id, user_name, email, role, avatar_url, is_verified, created_at`,
+    [user_name, email, "google", "student", avatar_url, true]
+  );
+  return result.rows[0];
+},
 }

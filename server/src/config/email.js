@@ -2,10 +2,13 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-export const tranporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD,
-    },
+export const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST, // smtp.gmail.com
+  port: process.env.EMAIL_PORT, // 587
+  secure: false, // true for 465, false for other ports (ví dụ: 587)
+  auth: {
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASSWORD, 
+  }
 });
+

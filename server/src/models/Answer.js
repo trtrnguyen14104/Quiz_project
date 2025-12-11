@@ -1,8 +1,8 @@
 import { pool } from "../config/database.js";
-const AnswerModel = {
+export const AnswerModel = {
   async findByQuestion(questionId) {
     const result = await pool.query(
-      'SELECT * FROM answers WHERE question_id = $1 ORDER BY answer_order',
+      "SELECT * FROM answers WHERE question_id = $1 ORDER BY answer_order",
       [questionId]
     );
     return result.rows;
@@ -10,7 +10,7 @@ const AnswerModel = {
 
   async findById(answerId) {
     const result = await pool.query(
-      'SELECT * FROM answers WHERE answer_id = $1',
+      "SELECT * FROM answers WHERE answer_id = $1",
       [answerId]
     );
     return result.rows[0];
@@ -44,6 +44,6 @@ const AnswerModel = {
   },
 
   async delete(answerId) {
-    return pool.query('DELETE FROM answers WHERE answer_id = $1', [answerId]);
-  }
+    return pool.query("DELETE FROM answers WHERE answer_id = $1", [answerId]);
+  },
 };

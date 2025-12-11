@@ -1,17 +1,16 @@
 import { pool } from "../config/database.js";
-const pool = require('../db/pool');
 
-const QuizCategoryModel = {
+export const QuizCategoryModel = {
   async findAll() {
     const result = await pool.query(
-      'SELECT * FROM quiz_categories WHERE deleted_at IS NULL ORDER BY category_name'
+      "SELECT * FROM quiz_categories WHERE deleted_at IS NULL ORDER BY category_name"
     );
     return result.rows;
   },
 
   async findById(categoryId) {
     const result = await pool.query(
-      'SELECT * FROM quiz_categories WHERE category_id = $1 AND deleted_at IS NULL',
+      "SELECT * FROM quiz_categories WHERE category_id = $1 AND deleted_at IS NULL",
       [categoryId]
     );
     return result.rows[0];
@@ -19,7 +18,7 @@ const QuizCategoryModel = {
 
   async findByName(categoryName) {
     const result = await pool.query(
-      'SELECT * FROM quiz_categories WHERE category_name = $1 AND deleted_at IS NULL',
+      "SELECT * FROM quiz_categories WHERE category_name = $1 AND deleted_at IS NULL",
       [categoryName]
     );
     return result.rows[0];
@@ -54,16 +53,16 @@ const QuizCategoryModel = {
 
   async softDelete(categoryId) {
     return pool.query(
-      'UPDATE quiz_categories SET deleted_at = CURRENT_TIMESTAMP WHERE category_id = $1',
+      "UPDATE quiz_categories SET deleted_at = CURRENT_TIMESTAMP WHERE category_id = $1",
       [categoryId]
     );
   },
 
   async countQuizzes(categoryId) {
     const result = await pool.query(
-      'SELECT COUNT(*) as quiz_count FROM quizzes WHERE category_id = $1',
+      "SELECT COUNT(*) as quiz_count FROM quizzes WHERE category_id = $1",
       [categoryId]
     );
     return parseInt(result.rows[0].quiz_count);
-  }
+  },
 };

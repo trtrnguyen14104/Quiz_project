@@ -17,6 +17,13 @@ CREATE INDEX idx_quiz_attempts_user ON quiz_attempts(user_id);
 CREATE INDEX idx_user_answers_attempt ON user_answers(attempt_id);
 CREATE INDEX idx_user_answers_question ON user_answers(question_id);
 CREATE INDEX idx_system_logs_user ON system_logs(user_id);
+CREATE INDEX idx_email_verifications_token ON email_verifications(token);
+CREATE INDEX idx_email_verifications_user ON email_verifications(user_id);
+CREATE INDEX idx_email_verifications_expires ON email_verifications(expires_at);
+CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+CREATE INDEX idx_password_reset_token ON password_reset_tokens(token);
+CREATE INDEX idx_password_reset_user ON password_reset_tokens(user_id);
+CREATE INDEX idx_password_reset_expires ON password_reset_tokens(expires_at);
 
 -- Search Indexes
 CREATE INDEX idx_subjects_name ON subjects(subject_name);

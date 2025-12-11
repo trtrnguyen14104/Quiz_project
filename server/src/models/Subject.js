@@ -1,16 +1,16 @@
 import { pool } from "../config/database.js";
 
-const SubjectModel = {
+export const SubjectModel = {
   async findAll() {
     const result = await pool.query(
-      'SELECT * FROM subjects WHERE deleted_at IS NULL ORDER BY subject_name'
+      "SELECT * FROM subjects WHERE deleted_at IS NULL ORDER BY subject_name"
     );
     return result.rows;
   },
 
   async findById(subjectId) {
     const result = await pool.query(
-      'SELECT * FROM subjects WHERE subject_id = $1 AND deleted_at IS NULL',
+      "SELECT * FROM subjects WHERE subject_id = $1 AND deleted_at IS NULL",
       [subjectId]
     );
     return result.rows[0];
@@ -53,6 +53,8 @@ const SubjectModel = {
   },
 
   async delete(subjectId) {
-    return pool.query('DELETE FROM subjects WHERE subject_id = $1', [subjectId]);
-  }
+    return pool.query("DELETE FROM subjects WHERE subject_id = $1", [
+      subjectId,
+    ]);
+  },
 };

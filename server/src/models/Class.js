@@ -1,5 +1,5 @@
 import { pool } from "../config/database.js";
-const ClassModel = {
+export const ClassModel = {
   async findAll() {
     const result = await pool.query(
       `SELECT c.*, s.subject_name, u.user_name as teacher_name

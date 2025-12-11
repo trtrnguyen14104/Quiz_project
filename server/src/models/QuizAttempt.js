@@ -1,5 +1,5 @@
 import { pool } from "../config/database.js";
-const QuizAttemptModel = {
+export const QuizAttemptModel = {
   async findByUser(userId) {
     const result = await pool.query(
       `SELECT qa.*, q.title as quiz_title
@@ -62,5 +62,53 @@ const QuizAttemptModel = {
       [end_time, total_score, status, attemptId]
     );
     return result.rows[0];
+  },
+  async findByUserID(userId, page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const result = await pool.query(
+            `SELECT qa.*, q.title as quiz_title, q.cover_image_url,
+                    s.subject_name
+             FROM quiz_attempts qa
+             JOIN quizzes q ON qa.quiz_id = q.quiz_id
+             LEFT JOIN subjects s ON q.subject_id = s.subject_id
+             WHERE qa.user_id = $1
+             ORDER BY qa.start_time DESC
+             LIMIT $2 OFFSET $3`,
+            [userId, limit, offset]
+      );
+    return result.rows;
+  },
+  async countAttemptsByUserId(userId) {
+    const countResult = await pool.query(
+            "SELECT COUNT(*) as total FROM quiz_attempts WHERE user_id = $1",
+            [userId]
+    );
+    return parseInt(countResult.rows[0].total);
+  },
+  async getStatsByUserId(userId) {
+    const stats = await pool.query(
+            `SELECT 
+               COUNT(DISTINCT qa.quiz_id) as total_quizzes_attempted,
+               COUNT(qa.attempt_id) as total_attempts,
+               AVG(qa.total_score) as average_score,
+               MAX(qa.total_score) as highest_score,
+               COUNT(CASE WHEN qa.status = 'completed' THEN 1 END) as completed_attempts
+             FROM quiz_attempts qa
+             WHERE qa.user_id = $1`,
+            [userId]
+          );
+      return stats.rows[0];
+  },
+  async getRecentAttemptsByUserId(userId) {
+    const recentAttempts = await pool.query(
+            `SELECT qa.*, q.title as quiz_title
+             FROM quiz_attempts qa
+             JOIN quizzes q ON qa.quiz_id = q.quiz_id
+             WHERE qa.user_id = $1
+             ORDER BY qa.start_time DESC
+             LIMIT 5`,
+            [userId]
+          );
+      return recentAttempts.rows;
   }
 };

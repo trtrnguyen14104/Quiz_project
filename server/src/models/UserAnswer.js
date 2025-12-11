@@ -1,5 +1,5 @@
 import { pool } from "../config/database.js";
-const UserAnswerModel = {
+export const UserAnswerModel = {
   async findByAttempt(attemptId) {
     const result = await pool.query(
       `SELECT ua.*, q.content as question_content, a.content as answer_content
@@ -15,7 +15,7 @@ const UserAnswerModel = {
 
   async findByAttemptAndQuestion(attemptId, questionId) {
     const result = await pool.query(
-      'SELECT * FROM user_answers WHERE attempt_id = $1 AND question_id = $2',
+      "SELECT * FROM user_answers WHERE attempt_id = $1 AND question_id = $2",
       [attemptId, questionId]
     );
     return result.rows[0];
@@ -34,13 +34,27 @@ const UserAnswerModel = {
   },
 
   async create(userAnswerData) {
-    const { attempt_id, question_id, answer_id, is_correct, points_earned, time_taken } = userAnswerData;
+    const {
+      attempt_id,
+      question_id,
+      answer_id,
+      is_correct,
+      points_earned,
+      time_taken,
+    } = userAnswerData;
 
     const result = await pool.query(
       `INSERT INTO user_answers (attempt_id, question_id, answer_id, is_correct, points_earned, time_taken)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [attempt_id, question_id, answer_id, is_correct, points_earned, time_taken]
+      [
+        attempt_id,
+        question_id,
+        answer_id,
+        is_correct,
+        points_earned,
+        time_taken,
+      ]
     );
     return result.rows[0];
   },
@@ -64,7 +78,7 @@ const UserAnswerModel = {
 
   async calculateScore(attemptId) {
     const result = await pool.query(
-      'SELECT SUM(points_earned) as total_score FROM user_answers WHERE attempt_id = $1',
+      "SELECT SUM(points_earned) as total_score FROM user_answers WHERE attempt_id = $1",
       [attemptId]
     );
     return parseFloat(result.rows[0].total_score) || 0;
@@ -82,5 +96,5 @@ const UserAnswerModel = {
       [attemptId]
     );
     return result.rows[0];
-  }
+  },
 };

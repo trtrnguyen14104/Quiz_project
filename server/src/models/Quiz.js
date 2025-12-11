@@ -1,6 +1,6 @@
 import { pool } from "../config/database.js";
 
-const QuizModel = {
+export const QuizModel = {
   async findAll(filters = {}) {
     let query = `
       SELECT q.*, s.subject_name, u.user_name as creator_name
@@ -27,7 +27,7 @@ const QuizModel = {
       params.push(filters.status);
     }
 
-    query += ' ORDER BY q.created_at DESC';
+    query += " ORDER BY q.created_at DESC";
 
     const result = await pool.query(query, params);
     return result.rows;
@@ -49,7 +49,7 @@ const QuizModel = {
 
   async findByCode(quizCode) {
     const result = await pool.query(
-      'SELECT * FROM quizzes WHERE quiz_code = $1',
+      "SELECT * FROM quizzes WHERE quiz_code = $1",
       [quizCode]
     );
     return result.rows[0];
@@ -57,8 +57,16 @@ const QuizModel = {
 
   async create(quizData) {
     const {
-      title, description, cover_image_url, quiz_code, subject_id,
-      topic_id, category_id, difficulty_level, creator_id, access_level
+      title,
+      description,
+      cover_image_url,
+      quiz_code,
+      subject_id,
+      topic_id,
+      category_id,
+      difficulty_level,
+      creator_id,
+      access_level,
     } = quizData;
 
     const result = await pool.query(
@@ -67,16 +75,31 @@ const QuizModel = {
         topic_id, category_id, difficulty_level, creator_id, access_level
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
-      [title, description, cover_image_url, quiz_code, subject_id,
-       topic_id, category_id, difficulty_level, creator_id, access_level]
+      [
+        title,
+        description,
+        cover_image_url,
+        quiz_code,
+        subject_id,
+        topic_id,
+        category_id,
+        difficulty_level,
+        creator_id,
+        access_level,
+      ]
     );
     return result.rows[0];
   },
 
   async update(quizId, quizData) {
     const {
-      title, description, cover_image_url, difficulty_level,
-      access_level, status, total_score
+      title,
+      description,
+      cover_image_url,
+      difficulty_level,
+      access_level,
+      status,
+      total_score,
     } = quizData;
 
     const result = await pool.query(
@@ -91,13 +114,35 @@ const QuizModel = {
            updated_at = CURRENT_TIMESTAMP
        WHERE quiz_id = $8
        RETURNING *`,
-      [title, description, cover_image_url, difficulty_level,
-       access_level, status, total_score, quizId]
+      [
+        title,
+        description,
+        cover_image_url,
+        difficulty_level,
+        access_level,
+        status,
+        total_score,
+        quizId,
+      ]
     );
     return result.rows[0];
   },
 
   async delete(quizId) {
-    return pool.query('DELETE FROM quizzes WHERE quiz_id = $1', [quizId]);
+    return pool.query("DELETE FROM quizzes WHERE quiz_id = $1", [quizId]);
+  },
+  async findQuizByUserID(userId) {
+    const result = await pool.query(
+            `SELECT q.*, s.subject_name, 
+                    COUNT(DISTINCT qa.attempt_id) as total_attempts
+             FROM quizzes q
+             LEFT JOIN subjects s ON q.subject_id = s.subject_id
+             LEFT JOIN quiz_attempts qa ON q.quiz_id = qa.quiz_id
+             WHERE q.creator_id = $1
+             GROUP BY q.quiz_id, s.subject_name
+             ORDER BY q.created_at DESC`,
+            [userId]
+    );
+      return result.rows;
   }
 };

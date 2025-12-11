@@ -1,5 +1,5 @@
 import { pool } from "../config/database.js";
-const SystemLogModel = {
+export const SystemLogModel = {
   async findAll(limit = 100, offset = 0) {
     const result = await pool.query(
       `SELECT sl.*, u.user_name
@@ -79,5 +79,5 @@ const SystemLogModel = {
       [startDate, endDate]
     );
     return result.rows;
-  }
+  },
 };

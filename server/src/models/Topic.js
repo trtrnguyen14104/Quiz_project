@@ -1,15 +1,15 @@
 import { pool } from "../config/database.js";
-const TopicModel = {
+export const TopicModel = {
   async findAll() {
     const result = await pool.query(
-      'SELECT * FROM topics WHERE deleted_at IS NULL ORDER BY topic_name'
+      "SELECT * FROM topics WHERE deleted_at IS NULL ORDER BY topic_name"
     );
     return result.rows;
   },
 
   async findBySubject(subjectId) {
     const result = await pool.query(
-      'SELECT * FROM topics WHERE subject_id = $1 AND deleted_at IS NULL ORDER BY topic_name',
+      "SELECT * FROM topics WHERE subject_id = $1 AND deleted_at IS NULL ORDER BY topic_name",
       [subjectId]
     );
     return result.rows;
@@ -17,7 +17,7 @@ const TopicModel = {
 
   async findById(topicId) {
     const result = await pool.query(
-      'SELECT * FROM topics WHERE topic_id = $1 AND deleted_at IS NULL',
+      "SELECT * FROM topics WHERE topic_id = $1 AND deleted_at IS NULL",
       [topicId]
     );
     return result.rows[0];
@@ -50,8 +50,8 @@ const TopicModel = {
 
   async softDelete(topicId) {
     return pool.query(
-      'UPDATE topics SET deleted_at = CURRENT_TIMESTAMP WHERE topic_id = $1',
+      "UPDATE topics SET deleted_at = CURRENT_TIMESTAMP WHERE topic_id = $1",
       [topicId]
     );
-  }
+  },
 };

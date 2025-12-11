@@ -1,5 +1,5 @@
 import { pool } from "../config/database.js";
-const ClassModel = {
+export const ClassMemberModel = {
   async findAll() {
     const result = await pool.query(
       `SELECT c.*, s.subject_name, u.user_name as teacher_name
@@ -38,14 +38,15 @@ const ClassModel = {
 
   async findByCode(classCode) {
     const result = await pool.query(
-      'SELECT * FROM classes WHERE class_code = $1 AND deleted_at IS NULL',
+      "SELECT * FROM classes WHERE class_code = $1 AND deleted_at IS NULL",
       [classCode]
     );
     return result.rows[0];
   },
 
   async create(classData) {
-    const { class_name, description, class_code, subject_id, teacher_id } = classData;
+    const { class_name, description, class_code, subject_id, teacher_id } =
+      classData;
 
     const result = await pool.query(
       `INSERT INTO classes (class_name, description, class_code, subject_id, teacher_id)
@@ -74,8 +75,8 @@ const ClassModel = {
 
   async softDelete(classId) {
     return pool.query(
-      'UPDATE classes SET deleted_at = CURRENT_TIMESTAMP WHERE class_id = $1',
+      "UPDATE classes SET deleted_at = CURRENT_TIMESTAMP WHERE class_id = $1",
       [classId]
     );
-  }
+  },
 };
