@@ -1,0 +1,166 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import StudentSidebar from '../../components/dashboard/student/StudentSidebar.jsx';
+import Button from '../../components/common/Button.jsx';
+import { studentAPI } from '../../services/api.js';
+
+const MyQuizzesPage = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // all, completed, pending
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  const fetchQuizzes = async () => {
+    try {
+      const response = await studentAPI.getQuizzes();
+      setQuizzes(response.data.result.quizzes);
+    } catch (error) {
+      console.error('Lỗi khi tải quiz:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredQuizzes = quizzes.filter(quiz => {
+    if (filter === 'completed') return quiz.completed;
+    if (filter === 'pending') return !quiz.completed;
+    return true;
+  });
+
+  return (
+    <div className="font-display bg-background-light dark:bg-background-dark min-h-screen">
+      <div className="flex min-h-screen">
+        <StudentSidebar user={user} />
+
+        <main className="flex-1 flex flex-col">
+          <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-white/10 px-10 py-3 bg-white dark:bg-background-dark sticky top-0 z-10">
+            <h1 className="text-[#111418] dark:text-white text-lg font-bold">Quiz của tôi</h1>
+            <Button onClick={() => navigate('/student/join-quiz')}>
+              Tham gia Quiz mới
+            </Button>
+          </header>
+
+          <div className="flex-1 p-10">
+            {/* Filter Tabs */}
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={() => setFilter('all')}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  filter === 'all'
+                    ? 'bg-primary text-white'
+                    : 'bg-white dark:bg-background-dark text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                Tất cả
+              </button>
+              <button
+                onClick={() => setFilter('pending')}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  filter === 'pending'
+                    ? 'bg-primary text-white'
+                    : 'bg-white dark:bg-background-dark text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                Chưa làm
+              </button>
+              <button
+                onClick={() => setFilter('completed')}
+                className={`px-4 py-2 rounded-lg font-medium ${
+                  filter === 'completed'
+                    ? 'bg-primary text-white'
+                    : 'bg-white dark:bg-background-dark text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                Đã hoàn thành
+              </button>
+            </div>
+
+            {/* Quiz Grid */}
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              </div>
+            ) : filteredQuizzes.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Không có quiz nào
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredQuizzes.map((quiz) => {
+                  const handleQuizClick = () => {
+                    if (quiz.completed) {
+                      // Check if max_attempts is set (not null/undefined) and reached limit
+                      const hasMaxAttempts = quiz.max_attempts !== null && quiz.max_attempts !== undefined;
+                      const reachedLimit = hasMaxAttempts && quiz.user_attempts_count >= quiz.max_attempts;
+
+                      if (reachedLimit) {
+                        // Reached max attempts, go to latest result
+                        if (quiz.latest_attempt_id) {
+                          navigate(`/student/result/${quiz.latest_attempt_id}`);
+                        }
+                      } else {
+                        // Can attempt again (either no limit or still has attempts left)
+                        navigate(`/student/quiz/${quiz.quiz_id}`);
+                      }
+                    } else {
+                      // Not completed yet, go to description page
+                      navigate(`/student/quiz/${quiz.quiz_id}`);
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={quiz.quiz_id}
+                      className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={handleQuizClick}
+                    >
+                    <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">
+                      {quiz.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      {quiz.question_count} câu hỏi
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                          quiz.completed
+                            ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'
+                        }`}
+                      >
+                        {quiz.completed ? 'Đã làm' : 'Chưa làm'}
+                      </span>
+
+                      {quiz.completed && quiz.score !== null && quiz.total_score && (
+                        <span className="text-sm font-bold text-primary">
+                          {((quiz.score / quiz.total_score) * 100).toFixed(1)}%
+                        </span>
+                      )}
+                    </div>
+
+                    {quiz.due_date && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+                        Hạn: {new Date(quiz.due_date).toLocaleDateString('vi-VN')}
+                      </p>
+                    )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default MyQuizzesPage;

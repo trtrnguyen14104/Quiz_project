@@ -2,7 +2,7 @@ import {UserModel} from "../models/User.js";
 import {QuizModel} from "../models/Quiz.js";
 import {ClassModel} from "../models/Class.js";
 import {SystemLogModel} from "../models/SystemLog.js";
-import {} from "../config/database.js";
+import {pool} from "../config/database.js";
 
 export const adminService = {
   async getDashboard() {

@@ -121,7 +121,7 @@ const RegisterPage = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                placeholder="Nhâp họ và tên của bạn"
+                placeholder="Nhập họ và tên của bạn"
                 error={errors.username}
                 required
               />

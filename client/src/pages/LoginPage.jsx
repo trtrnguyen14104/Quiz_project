@@ -84,9 +84,6 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-3xl">Q</span>
-            </div>
             <h2 className="text-3xl font-bold text-gray-800">Chào mừng trở lại</h2>
             <p className="text-gray-600 mt-2">Đăng nhập vào tài khoản của bạn</p>
           </div>
@@ -106,18 +103,18 @@ export default function LoginPage() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="your@email.com"
+              placeholder="example@gmail.com"
               error={errors.email}
               required
             />
 
             <Input
-              label="Password"
+              label="Mật khẩu"
               name="password"
               type="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter your password"
+              placeholder="Nhập mật khẩu của bạn"
               error={errors.password}
               required
             />
@@ -134,16 +131,16 @@ export default function LoginPage() {
           {/* Links */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              Don't have an account?{' '}
+              Chưa có tài khoản?{' '}
               <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
-                Register here
+                Đăng ký ngay
               </Link>
             </p>
           </div>
 
           <div className="mt-4 text-center">
             <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
-              � Back to Home
+              Quay lại trang chủ
             </Link>
           </div>
         </div>

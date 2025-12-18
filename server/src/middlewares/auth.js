@@ -49,3 +49,17 @@ export const authorize = (roles) => {
     next();
   };
 };
+
+export const requireRole = (role) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: "Chưa xác thực" });
+    }
+
+    if (req.user.role !== role) {
+      return res.status(403).json({ error: "Không có quyền truy cập chức năng này" });
+    }
+
+    next();
+  };
+};

@@ -10,32 +10,29 @@ export default function HomePage() {
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">Q</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800">Quiz App</h1>
+            <h1 className="text-2xl font-bold text-gray-800">QuizLearn</h1>
           </div>
           <nav className="flex items-center gap-4">
             {user ? (
               <>
-                <span className="text-gray-600">Welcome, {user.user_name || user.name}</span>
+                <span className="text-gray-600">Chào mừng, {user.user_name || user.name}</span>
                 <Link
                   to={`/${user.role}/dashboard`}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Dashboard
+                  Trang chính
                 </Link>
               </>
             ) : (
               <>
                 <Link to="/login" className="px-4 py-2 text-blue-600 hover:text-blue-700">
-                  Login
+                  Đăng nhập
                 </Link>
                 <Link
                   to="/register"
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Register
+                  Đăng ký
                 </Link>
               </>
             )}
@@ -47,10 +44,10 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-16">
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="text-5xl font-bold text-gray-800 mb-6">
-            Welcome to Quiz Platform
+            Chào mừng bạn đến với Quizlearn
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Create, share, and take quizzes with ease. Perfect for teachers and students.
+            Tạo, chia sẻ và học hỏi qua các bài quiz tương tác
           </p>
 
           {!user && (
@@ -59,13 +56,13 @@ export default function HomePage() {
                 to="/register"
                 className="px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Get Started
+                Bắt đầu ngay
               </Link>
               <Link
                 to="/login"
                 className="px-8 py-3 border-2 border-blue-600 text-blue-600 text-lg font-semibold rounded-lg hover:bg-blue-50 transition-colors"
               >
-                Sign In
+                Đang nhập
               </Link>
             </div>
           )}
@@ -74,32 +71,23 @@ export default function HomePage() {
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 mt-16">
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">=�</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Create Quizzes</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Tạo bài Quiz</h3>
             <p className="text-gray-600">
-              Easily create custom quizzes with multiple question types and settings.
+              Dễ dàng tạo các bài quiz tương tác với nhiều loại câu hỏi khác nhau.
             </p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">=e</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Manage Classes</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Quản lý lớp học</h3>
             <p className="text-gray-600">
-              Organize students into classes and assign quizzes efficiently.
+              Tổ chức và quản lý các lớp học của bạn một cách hiệu quả.
             </p>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-md">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">=�</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Track Progress</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Theo dõi tiến trình</h3>
             <p className="text-gray-600">
-              Monitor student performance with detailed analytics and reports.
+              Theo dõi hiệu suất và tiến trình học tập của học sinh qua các báo cáo chi tiết.
             </p>
           </div>
         </div>

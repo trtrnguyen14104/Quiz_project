@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import routes from "./routes/index.js";
-import passport from "passport";
+// import passport from "passport";
 import dotenv from "dotenv";
-import session from "express-session";
+// import session from "express-session";
 import { apiLimiter } from "./middlewares/rateLimiter.js";
 dotenv.config();
 
@@ -18,23 +18,23 @@ app.use(express.json());
 
 app.use("/api/", apiLimiter);
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production", // true in production
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       secure: process.env.NODE_ENV === "production",
+//       maxAge: 24 * 60 * 60 * 1000,
+//     },
+//   })
+// );
 
 // Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api", routes);

@@ -150,7 +150,7 @@ export const quizService = {
     }
   },
 
-  async getQuizWithQuestions(quizId) {
+  async getQuizWithQuestions(quizId, userId = null) {
     try {
       const quiz = await QuizModel.findById(quizId);
       if (!quiz) {
@@ -170,12 +170,44 @@ export const quizService = {
         })
       );
 
+      // Get user attempt info if userId provided
+      let userAttemptInfo = {};
+      if (userId) {
+        const attemptQuery = await pool.query(
+          `SELECT
+            COUNT(*) as user_attempts_count,
+            (SELECT attempt_id FROM quiz_attempts
+             WHERE quiz_id = $1 AND user_id = $2 AND status = 'submitted'
+             ORDER BY end_time DESC LIMIT 1) as latest_attempt_id
+           FROM quiz_attempts
+           WHERE quiz_id = $1 AND user_id = $2 AND status = 'submitted'`,
+          [quizId, userId]
+        );
+        userAttemptInfo = attemptQuery.rows[0];
+      }
+
+      // Check if quiz is in a class and get class-specific settings
+      const classQuizQuery = await pool.query(
+        `SELECT max_attempts, result_mode, due_date
+         FROM class_quizzes cq
+         JOIN class_members cm ON cq.class_id = cm.class_id
+         WHERE cq.quiz_id = $1 AND cm.user_id = $2 AND cm.status = 'active'
+         LIMIT 1`,
+        [quizId, userId || 0]
+      );
+
+      const classQuizData = classQuizQuery.rows[0];
+
       return {
         wasSuccessful: true,
         message: "Lấy quiz với câu hỏi thành công",
         result: {
           ...quiz,
           questions: questionsWithAnswers,
+          max_attempts: classQuizData?.max_attempts || null,
+          result_mode: classQuizData?.result_mode || quiz.result_mode,
+          due_date: classQuizData?.due_date || null,
+          ...userAttemptInfo,
         },
       };
     } catch (error) {

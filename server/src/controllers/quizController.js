@@ -18,8 +18,8 @@ export const quizController = {
 
   async getById(req, res) {
     try {
-      const { id } = req.params;
-      const result = await quizService.getById(id);
+      const { quiz_id } = req.params;
+      const result = await quizService.getById(quiz_id);
       if (!result.wasSuccessful) {
         return res.status(404).json(result);
       }
@@ -47,7 +47,8 @@ export const quizController = {
   async getQuizWithQuestions(req, res) {
     try {
       const { id } = req.params;
-      const result = await quizService.getQuizWithQuestions(id);
+      const userId = req.user?.id || null; // Get userId from auth middleware if available
+      const result = await quizService.getQuizWithQuestions(id, userId);
       if (!result.wasSuccessful) {
         return res.status(404).json(result);
       }

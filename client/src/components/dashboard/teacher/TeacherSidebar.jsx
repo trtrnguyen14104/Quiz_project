@@ -6,7 +6,6 @@ const TeacherSidebar = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Menu items cho teacher
   const menuItems = [
     {
       path: '/teacher/dashboard',
@@ -20,17 +19,17 @@ const TeacherSidebar = ({ user }) => {
       path: '/teacher/quizzes',
       label: 'Quiz của tôi',
     },
-    {
-      path: '/teacher/reports',
-      label: 'Thống kê',
-    },
+    // {
+    //   path: '/teacher/reports',
+    //   label: 'Thống kê',
+    // },
   ];
 
   // Kiểm tra menu item có đang active không
   const isActive = (path) => {
     return location.pathname === path;
   };
-
+  
   return (
     <aside className="w-64 flex-shrink-0 bg-white dark:bg-[#18232f] border-r border-gray-200 dark:border-gray-700">
       <div className="flex h-full min-h-[700px] flex-col justify-between p-4">

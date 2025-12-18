@@ -11,6 +11,7 @@ const StudentSidebar = ({ user }) => {
     { path: '/student/join-class', label: 'Tham gia lớp' },
     { path: '/student/join-quiz',  label: 'Tham gia Quiz' },
     { path: '/student/my-quizzes', label: 'Quiz của tôi' },
+    { path: '/student/quiz-library', label: 'Thư viện Quiz' },
     { path: '/student/results', label: 'Kết quả của tôi' },
     { path: '/student/classes', label: 'Lớp đã tham gia' },
   ];

@@ -14,7 +14,6 @@ export default function VerifyEmailPage() {
     const verifyEmail = async () => {
       try {
         await authAPI.verifyEmail(token);
-        // Chuyển hướng đến trang đăng nhập sau 3 giây
         navigate('/login');
       } catch (error) {
         setStatus('error');

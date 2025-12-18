@@ -8,9 +8,9 @@ const TeacherDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
-    totalStudents: 0,
-    activeQuizzes: 0,
-    averageScore: 0,
+    total_students: 0,
+    active_quizzes: 0,
+    average_score: 0,
   });
   const [classes, setClasses] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
@@ -26,7 +26,7 @@ const TeacherDashboard = () => {
       if (userStr) setUser(JSON.parse(userStr));
 
       const dashboardRes = await teacherAPI.getDashboard();
-      const { stats, classes, quizzes } = dashboardRes.data;
+      const { stats, classes, quizzes } = dashboardRes.data.result;
       
       setStats(stats);
       setClasses(classes);
@@ -63,15 +63,12 @@ const TeacherDashboard = () => {
             <div className="flex items-center gap-8">
               {/* Search Bar */}
               <label className="flex flex-col w-96 !h-10">
-                <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
-                  <div className="text-gray-500 dark:text-gray-400 flex bg-[#f0f2f4] dark:bg-[#101922] items-center justify-center pl-4 rounded-l-lg">
-                    <span className="material-symbols-outlined">search</span>
-                  </div>
+                {/* <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
                   <input 
                     className="form-input flex w-full min-w-0 flex-1 rounded-r-lg text-[#111418] dark:text-white focus:outline-0 focus:ring-0 border-none bg-[#f0f2f4] dark:bg-[#101922] h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4" 
                     placeholder="Tìm kiếm lớp, quiz, học sinh..." 
                   />
-                </div>
+                </div> */}
               </label>
             </div>
             
@@ -94,11 +91,8 @@ const TeacherDashboard = () => {
                 />
                 <div className="flex flex-col text-left">
                   <h1 className="text-[#111418] dark:text-white text-sm font-medium">
-                    {user?.name || 'Giáo viên'}
+                    {user?.user_name || 'Giáo viên'}
                   </h1>
-                  <p className="text-gray-500 dark:text-gray-400 text-xs">
-                    {user?.subject || 'Giáo viên'}
-                  </p>
                 </div>
               </div>
             </div>
@@ -111,7 +105,7 @@ const TeacherDashboard = () => {
             <div className="flex flex-wrap justify-between gap-3 mb-6">
               <div className="flex min-w-72 flex-col gap-2">
                 <p className="text-[#111418] dark:text-white text-3xl font-bold">
-                  Xin chào, {user?.name?.split(' ')[0] || 'Giáo viên'}!
+                  Xin chào, {user?.user_name || 'Giáo viên'}!
                 </p>
                 <p className="text-gray-500 dark:text-gray-400 text-base">
                   Dưới đây là tổng quan quiz và lớp của bạn
@@ -126,7 +120,7 @@ const TeacherDashboard = () => {
                   Số học sinh hiện tại
                 </p>
                 <p className="text-[#111418] dark:text-white text-3xl font-bold">
-                  {stats.totalStudents}
+                  {stats.total_students}
                 </p>
               </div>
 
@@ -135,7 +129,7 @@ const TeacherDashboard = () => {
                   Quiz hoạt động
                 </p>
                 <p className="text-[#111418] dark:text-white text-3xl font-bold">
-                  {stats.activeQuizzes}
+                  {stats.active_quizzes}
                 </p>
               </div>
 
@@ -144,7 +138,7 @@ const TeacherDashboard = () => {
                   Điểm trung bình
                 </p>
                 <p className="text-[#111418] dark:text-white text-3xl font-bold">
-                  {stats.averageScore}%
+                  {stats.average_score}%
                 </p>
               </div>
             </div>
@@ -165,54 +159,45 @@ const TeacherDashboard = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {classes.map((cls) => (
-                  <div 
-                    key={cls.id} 
+                  <div
+                    key={cls.class_id}
                     className="bg-white dark:bg-[#18232f] rounded-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-4 hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => navigate(`/teacher/class/${cls.id}`)}
+                    onClick={() => navigate(`/teacher/class/${cls.class_id}`)}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex flex-col flex-1">
                         <h3 className="font-bold text-lg text-[#111418] dark:text-white">
-                          {cls.name}
+                          {cls.class_name}
                         </h3>
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                          {cls.studentCount} học sinh
+                          {cls.student_count} học sinh
                         </p>
                       </div>
-                      <span className="material-symbols-outlined text-gray-400 text-2xl">
-                        {cls.icon}
-                      </span>
                     </div>
-                    
+
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Điểm trung bình gần đây
+                        Điểm trung bình
                       </p>
-                      <p className={`text-2xl font-bold ${
-                        cls.score >= 90 
-                          ? 'text-green-600' 
-                          : cls.score >= 80 
-                          ? 'text-yellow-600' 
-                          : 'text-red-600'
-                      }`}>
+                      <p className='text-2xl font-bold text-green-600'>
                         {cls.score}%
                       </p>
                     </div>
-                    
+
                     <div className="flex gap-2 mt-2">
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/teacher/class/${cls.id}`);
+                          navigate(`/teacher/class/${cls.class_id}`);
                         }}
                         className="flex-1 rounded-lg h-9 px-3 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
                       >
                         Xem chi tiết
                       </button>
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/teacher/class/${cls.id}/manage`);
+                          navigate(`/teacher/class/${cls.class_id}/manage`);
                         }}
                         className="flex-1 rounded-lg h-9 px-3 bg-[#f0f2f4] dark:bg-[#101922] text-[#111418] dark:text-white text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
                       >
@@ -261,37 +246,37 @@ const TeacherDashboard = () => {
                     </thead>
                     <tbody>
                       {quizzes.map((quiz) => (
-                        <tr 
-                          key={quiz.id} 
+                        <tr
+                          key={quiz.quiz_id}
                           className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
-                          onClick={() => navigate(`/teacher/quiz/${quiz.id}`)}
+                          onClick={() => navigate(`/teacher/quiz/${quiz.quiz_id}`)}
                         >
                           <td className="p-4 font-medium text-[#111418] dark:text-white">
                             {quiz.title}
                           </td>
                           <td className="p-4 text-gray-600 dark:text-gray-300">
-                            {quiz.className}
+                            {quiz.class_name || '-'}
                           </td>
                           <td className="p-4 text-gray-600 dark:text-gray-300">
-                            {quiz.questionCount}
+                            {quiz.question_count}
                           </td>
                           <td className="p-4 text-gray-600 dark:text-gray-300">
-                            {quiz.dueDate || '-'}
+                            {quiz.due_date ? new Date(quiz.due_date).toLocaleDateString('vi-VN') : '-'}
                           </td>
                           <td className="p-4">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(quiz.status)}`}>
-                              {quiz.status === 'graded' ? 'Đã chấm' : quiz.status === 'live' ? 'Đang diễn ra' : 'Nháp'}
+                              {quiz.status === 'published' ? 'Đã xuất bản' : quiz.status === 'draft' ? 'Nháp' : 'Đã lưu trữ'}
                             </span>
                           </td>
                           <td className="p-4 text-right">
-                            <button 
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/teacher/quiz/${quiz.id}`);
+                                navigate(`/teacher/quiz/${quiz.quiz_id}`);
                               }}
                               className="text-primary font-bold text-sm hover:underline"
                             >
-                              {quiz.status === 'graded' ? 'Xem kết quả' : quiz.status === 'live' ? 'Giao bài' : 'Chỉnh sửa'}
+                              {quiz.status === 'published' ? 'Xem chi tiết' : 'Chỉnh sửa'}
                             </button>
                           </td>
                         </tr>

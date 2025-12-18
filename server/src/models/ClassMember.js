@@ -1,82 +1,71 @@
 import { pool } from "../config/database.js";
+
 export const ClassMemberModel = {
-  async findAll() {
+  async findByClassAndUser(classId, userId) {
     const result = await pool.query(
-      `SELECT c.*, s.subject_name, u.user_name as teacher_name
-       FROM classes c
-       LEFT JOIN subjects s ON c.subject_id = s.subject_id
-       LEFT JOIN users u ON c.teacher_id = u.user_id
-       WHERE c.deleted_at IS NULL AND c.status = 'active'
-       ORDER BY c.created_at DESC`
+      `SELECT * FROM class_members
+       WHERE class_id = $1 AND user_id = $2`,
+      [classId, userId]
+    );
+    return result.rows[0];
+  },
+
+  async findByClass(classId) {
+    const result = await pool.query(
+      `SELECT cm.*, u.user_name, u.email, u.avatar_url
+       FROM class_members cm
+       JOIN users u ON cm.user_id = u.user_id
+       WHERE cm.class_id = $1 AND cm.status = 'active'
+       ORDER BY cm.joined_at DESC`,
+      [classId]
     );
     return result.rows;
   },
 
-  async findByTeacher(teacherId) {
+  async findByUser(userId) {
     const result = await pool.query(
-      `SELECT c.*, s.subject_name
-       FROM classes c
+      `SELECT cm.*, c.class_name, c.class_code, s.subject_name, u.user_name as teacher_name
+       FROM class_members cm
+       JOIN classes c ON cm.class_id = c.class_id
        LEFT JOIN subjects s ON c.subject_id = s.subject_id
-       WHERE c.teacher_id = $1 AND c.deleted_at IS NULL
-       ORDER BY c.created_at DESC`,
-      [teacherId]
+       LEFT JOIN users u ON c.teacher_id = u.user_id
+       WHERE cm.user_id = $1 AND cm.status = 'active' AND c.deleted_at IS NULL
+       ORDER BY cm.joined_at DESC`,
+      [userId]
     );
     return result.rows;
   },
 
-  async findById(classId) {
-    const result = await pool.query(
-      `SELECT c.*, s.subject_name, u.user_name as teacher_name
-       FROM classes c
-       LEFT JOIN subjects s ON c.subject_id = s.subject_id
-       LEFT JOIN users u ON c.teacher_id = u.user_id
-       WHERE c.class_id = $1 AND c.deleted_at IS NULL`,
-      [classId]
-    );
-    return result.rows[0];
-  },
-
-  async findByCode(classCode) {
-    const result = await pool.query(
-      "SELECT * FROM classes WHERE class_code = $1 AND deleted_at IS NULL",
-      [classCode]
-    );
-    return result.rows[0];
-  },
-
-  async create(classData) {
-    const { class_name, description, class_code, subject_id, teacher_id } =
-      classData;
+  async create(memberData) {
+    const { class_id, user_id, status = 'active' } = memberData;
 
     const result = await pool.query(
-      `INSERT INTO classes (class_name, description, class_code, subject_id, teacher_id)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO class_members (class_id, user_id, status)
+       VALUES ($1, $2, $3)
        RETURNING *`,
-      [class_name, description, class_code, subject_id, teacher_id]
+      [class_id, user_id, status]
     );
     return result.rows[0];
   },
 
-  async update(classId, classData) {
-    const { class_name, description, status } = classData;
-
+  async updateStatus(classId, userId, status) {
     const result = await pool.query(
-      `UPDATE classes 
-       SET class_name = COALESCE($1, class_name),
-           description = COALESCE($2, description),
-           status = COALESCE($3, status),
-           updated_at = CURRENT_TIMESTAMP
-       WHERE class_id = $4 AND deleted_at IS NULL
+      `UPDATE class_members
+       SET status = $3
+       WHERE class_id = $1 AND user_id = $2
        RETURNING *`,
-      [class_name, description, status, classId]
+      [classId, userId, status]
     );
     return result.rows[0];
   },
 
-  async softDelete(classId) {
-    return pool.query(
-      "UPDATE classes SET deleted_at = CURRENT_TIMESTAMP WHERE class_id = $1",
-      [classId]
+  async remove(classId, userId) {
+    const result = await pool.query(
+      `DELETE FROM class_members
+       WHERE class_id = $1 AND user_id = $2
+       RETURNING *`,
+      [classId, userId]
     );
+    return result.rows[0];
   },
 };
