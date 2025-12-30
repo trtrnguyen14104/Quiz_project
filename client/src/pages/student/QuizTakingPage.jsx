@@ -15,6 +15,7 @@ const QuizTakingPage = () => {
   const [timeLeft, setTimeLeft] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
+  const [attemptId, setAttemptId] = useState(null);
 
   useEffect(() => {
     fetchQuizDetail();
@@ -38,13 +39,22 @@ const QuizTakingPage = () => {
 
   const fetchQuizDetail = async () => {
     try {
-      const response = await studentAPI.getQuizDetail(quiz_id);
+      const response = await studentAPI.getQuizWithQuestions(quiz_id);
       const quizData = response.data.result;
 
       setQuiz(quizData);
 
       if (quizData.time_limit) {
         setTimeLeft(quizData.time_limit * 60); // Convert to seconds
+      }
+
+      // Start attempt
+      const attemptResponse = await studentAPI.startAttempt(quiz_id);
+      if (attemptResponse.data.wasSuccessful) {
+        setAttemptId(attemptResponse.data.result.attempt_id);
+      } else {
+        alert(attemptResponse.data.message);
+        navigate('/student/dashboard');
       }
     } catch (error) {
       console.error('Lỗi khi tải quiz:', error);
@@ -55,27 +65,60 @@ const QuizTakingPage = () => {
     }
   };
 
-  const handleAnswerChange = (questionId, answerIndex) => {
+  const handleAnswerChange = async (questionId, answerIndex) => {
+    if (!attemptId) {
+      alert('Chưa khởi tạo attempt. Vui lòng thử lại.');
+      return;
+    }
+
     const newAnswers = { ...answers, [questionId]: answerIndex };
     setAnswers(newAnswers);
 
-    // In practice mode, show immediate feedback
-    if (quiz.result_mode === 'practice') {
+    try {
+      // Lấy answer_id từ answerIndex
       const currentQ = quiz.questions.find(q => q.question_id === questionId);
-      const isCorrect = currentQ.correct_answer === answerIndex;
+      const selectedAnswer = currentQ.answers[answerIndex];
 
-      setAnswerFeedback({
-        ...answerFeedback,
-        [questionId]: {
-          isCorrect,
-          correctAnswer: currentQ.correct_answer,
-          selectedAnswer: answerIndex
-        }
+      // Submit answer to backend
+      const response = await studentAPI.submitAnswer(attemptId, {
+        question_id: questionId,
+        answer_id: selectedAnswer.answer_id,
+        time_taken: 0 // TODO: Track actual time
       });
+
+      // Practice mode: Show feedback immediately
+      if (quiz.result_mode === 'practice' && response.data.result?.is_correct !== null) {
+        const correctAnswerIndex = currentQ.answers.findIndex(a => a.is_correct);
+        setAnswerFeedback({
+          ...answerFeedback,
+          [questionId]: {
+            isCorrect: response.data.result.is_correct,
+            correctAnswer: correctAnswerIndex,
+            selectedAnswer: answerIndex
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Lỗi khi submit answer:', error);
+      // Rollback UI if failed
+      const rollbackAnswers = { ...answers };
+      delete rollbackAnswers[questionId];
+      setAnswers(rollbackAnswers);
+
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert('Không thể lưu câu trả lời. Vui lòng thử lại.');
+      }
     }
   };
 
   const handleSubmit = async () => {
+    if (!attemptId) {
+      alert('Chưa khởi tạo bài làm. Vui lòng thử lại.');
+      return;
+    }
+
     if (Object.keys(answers).length < quiz.questions.length) {
       if (!confirm('Bạn chưa trả lời hết các câu hỏi. Bạn có chắc muốn nộp bài?')) return;
     } else {
@@ -83,15 +126,14 @@ const QuizTakingPage = () => {
     }
 
     try {
-      const response = await studentAPI.submitQuiz(quiz_id, { answers });
+      const response = await studentAPI.finishAttempt(attemptId);
       setSubmitted(true);
 
-      if (response.data.result?.attempt_id) {
+      if (response.data.wasSuccessful) {
         alert('Nộp bài thành công!');
-        navigate(`/student/result/${response.data.result.attempt_id}`);
+        navigate(`/student/result/${attemptId}`);
       } else {
-        alert('Nộp bài thành công!');
-        navigate('/student/results');
+        alert(response.data.message || 'Không thể nộp bài.');
       }
     } catch (error) {
       console.error('Lỗi khi nộp bài:', error);
@@ -113,10 +155,12 @@ const QuizTakingPage = () => {
     );
   }
 
-  if (!quiz) {
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-        <p className="text-gray-500 dark:text-gray-400">Quiz không tồn tại</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          {!quiz ? 'Quiz không tồn tại' : 'Quiz chưa có câu hỏi'}
+        </p>
       </div>
     );
   }
@@ -170,11 +214,11 @@ const QuizTakingPage = () => {
               <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-8 mb-6">
                 <div className="flex justify-between items-start mb-6">
                   <h2 className="text-2xl font-bold text-[#111418] dark:text-white flex-1">
-                    {currentQ.question_text}
+                    {currentQ.content}
                   </h2>
-                  {currentQ.score && (
+                  {currentQ.points && (
                     <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 ml-4">
-                      {currentQ.score} điểm
+                      {currentQ.points} điểm
                     </span>
                   )}
                 </div>
@@ -224,7 +268,7 @@ const QuizTakingPage = () => {
                           className="w-5 h-5 text-primary"
                         />
                         <span className="ml-3 text-[#111418] dark:text-white flex-1">
-                          {answer.answer_text}
+                          {answer.content}
                         </span>
                         {quiz.result_mode === 'practice' && isCorrect && (
                           <span className="text-green-600 dark:text-green-400 font-semibold">✓</span>

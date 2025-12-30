@@ -14,16 +14,16 @@ const QuizDescriptionPage = () => {
 
   useEffect(() => {
     fetchQuizInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quiz_id]);
 
   const fetchQuizInfo = async () => {
     try {
-      const response = await studentAPI.getQuizDetail(quiz_id);
+      const response = await studentAPI.getQuizWithQuestions(quiz_id);
       const quizData = response.data.result;
 
       setQuiz(quizData);
 
-      // Check if quiz has max attempts and how many attempts user has made
       const hasMaxAttempts = quizData.max_attempts !== null && quizData.max_attempts !== undefined;
 
       if (hasMaxAttempts) {
@@ -38,7 +38,6 @@ const QuizDescriptionPage = () => {
           latestAttemptId
         });
       } else {
-        // No max attempts limit - user can always attempt
         setAttemptInfo({
           current: quizData.user_attempts_count || 0,
           max: null,
@@ -132,7 +131,7 @@ const QuizDescriptionPage = () => {
                   <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Số câu hỏi</p>
                     <p className="text-2xl font-bold text-[#111418] dark:text-white">
-                      {quiz.question_count}
+                      {quiz.statistics?.question_count || quiz.questions?.length || 0}
                     </p>
                   </div>
 
@@ -201,12 +200,17 @@ const QuizDescriptionPage = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-4">
-                  {canAttempt ? (
+                  {canAttempt && (
                     <Button onClick={handleStartQuiz} className="flex-1">
                       Bắt đầu làm bài
                     </Button>
-                  ) : (
-                    <Button onClick={handleViewResult} className="flex-1">
+                  )}
+                  {attemptInfo && attemptInfo.latestAttemptId && (
+                    <Button
+                      onClick={handleViewResult}
+                      variant={canAttempt ? "secondary" : "primary"}
+                      className={canAttempt ? "" : "flex-1"}
+                    >
                       Xem kết quả
                     </Button>
                   )}

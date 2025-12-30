@@ -18,8 +18,8 @@ export const quizController = {
 
   async getById(req, res) {
     try {
-      const { quiz_id } = req.params;
-      const result = await quizService.getById(quiz_id);
+      const { id } = req.params;
+      const result = await quizService.getById(id);
       if (!result.wasSuccessful) {
         return res.status(404).json(result);
       }

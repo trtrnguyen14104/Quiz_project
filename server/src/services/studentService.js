@@ -165,7 +165,7 @@ export const studentService = {
       let statusCondition = "";
       const params = [userId, limit, offset];
 
-      if (status === "completed") {
+      if (status === "submitted") {
         statusCondition = `
           AND EXISTS(
             SELECT 1 FROM quiz_attempts

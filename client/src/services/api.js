@@ -53,8 +53,14 @@ export const studentAPI = {
   getClassStudents: (classId) => api.get(`/student/classes/${classId}/students`),
   getMyCreatedQuizzes: () => api.get("/student/my-created-quizzes"),
   joinClass: (class_code) => api.post("/classes/join", { class_code }),
-  submitQuiz: (quizId, answers) => api.post(`/attempts/${quizId}`, { answers }),
   getQuizDetail: (quiz_id) => api.get(`/quizzes/${quiz_id}`),
+  getQuizWithQuestions: (quiz_id) => api.get(`/quizzes/${quiz_id}/full`),
+
+  // Quiz attempt APIs
+  startAttempt: (quizId) => api.post(`/attempts/quiz/${quizId}/start`),
+  submitAnswer: (attemptId, data) => api.post(`/attempts/${attemptId}/answer`, data),
+  finishAttempt: (attemptId) => api.post(`/attempts/${attemptId}/finish`),
+  getAttemptResult: (attemptId) => api.get(`/attempts/${attemptId}/result`),
 };
 
 export const teacherAPI = {

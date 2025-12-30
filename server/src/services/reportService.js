@@ -23,7 +23,7 @@ export const reportService = {
           MIN(total_score) as lowest_score,
           AVG(EXTRACT(EPOCH FROM (end_time - start_time))/60) as avg_time_minutes
         FROM quiz_attempts
-        WHERE quiz_id = $1 AND status = 'completed'
+        WHERE quiz_id = $1 AND status = 'submitted'
       `, [quizId]);
 
       const scoreDistribution = await pool.query(`
@@ -37,7 +37,7 @@ export const reportService = {
           END as score_range,
           COUNT(*) as count
         FROM quiz_attempts
-        WHERE quiz_id = $1 AND status = 'completed'
+        WHERE quiz_id = $1 AND status = 'submitted'
         GROUP BY score_range
         ORDER BY score_range DESC
       `, [quizId]);
@@ -69,7 +69,7 @@ export const reportService = {
           EXTRACT(EPOCH FROM (qa.end_time - qa.start_time))/60 as time_taken_minutes
         FROM quiz_attempts qa
         JOIN users u ON qa.user_id = u.user_id
-        WHERE qa.quiz_id = $1 AND qa.status = 'completed'
+        WHERE qa.quiz_id = $1 AND qa.status = 'submitted'
         ORDER BY qa.total_score DESC, time_taken_minutes ASC
         LIMIT 10
       `, [quizId]);
@@ -128,7 +128,7 @@ export const reportService = {
           AVG(qa.total_score) as average_score
         FROM class_quizzes cq
         JOIN quizzes q ON cq.quiz_id = q.quiz_id
-        LEFT JOIN quiz_attempts qa ON q.quiz_id = qa.quiz_id AND qa.status = 'completed'
+        LEFT JOIN quiz_attempts qa ON q.quiz_id = qa.quiz_id AND qa.status = 'submitted'
         WHERE cq.class_id = $1
         GROUP BY q.quiz_id, q.title, cq.assigned_at, cq.due_date
         ORDER BY cq.assigned_at DESC
@@ -175,7 +175,7 @@ export const reportService = {
           COUNT(*) as total_attempts,
           AVG(total_score) as average_score,
           MAX(total_score) as highest_score,
-          COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_attempts
+          COUNT(CASE WHEN status = 'submitted' THEN 1 END) as completed_attempts
         FROM quiz_attempts
         WHERE user_id = $1
       `, [userId]);
@@ -202,7 +202,7 @@ export const reportService = {
         FROM quiz_attempts qa
         JOIN quizzes q ON qa.quiz_id = q.quiz_id
         JOIN subjects s ON q.subject_id = s.subject_id
-        WHERE qa.user_id = $1 AND qa.status = 'completed'
+        WHERE qa.user_id = $1 AND qa.status = 'submitted'
         GROUP BY s.subject_id, s.subject_name
         ORDER BY average_score DESC
       `, [userId]);
@@ -213,7 +213,7 @@ export const reportService = {
           COUNT(*) as attempts,
           AVG(total_score) as avg_score
         FROM quiz_attempts
-        WHERE user_id = $1 AND status = 'completed'
+        WHERE user_id = $1 AND status = 'submitted'
         GROUP BY DATE(start_time)
         ORDER BY date DESC
         LIMIT 30
@@ -248,7 +248,7 @@ export const reportService = {
         FROM users u
         LEFT JOIN quiz_attempts qa ON u.user_id = qa.user_id
         LEFT JOIN class_quizzes cq ON qa.quiz_id = cq.quiz_id
-        WHERE u.user_id = ANY($1) AND cq.class_id = $2 AND qa.status = 'completed'
+        WHERE u.user_id = ANY($1) AND cq.class_id = $2 AND qa.status = 'submitted'
         GROUP BY u.user_id, u.user_name
         ORDER BY average_score DESC
       `, [studentIds, classId]);

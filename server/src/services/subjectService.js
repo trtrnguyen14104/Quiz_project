@@ -318,7 +318,7 @@ export const subjectService = {
         LEFT JOIN quizzes q ON s.subject_id = q.subject_id
         LEFT JOIN topics t ON s.subject_id = t.subject_id AND t.deleted_at IS NULL
         LEFT JOIN classes c ON s.subject_id = c.subject_id AND c.deleted_at IS NULL
-        LEFT JOIN quiz_attempts qa ON q.quiz_id = qa.quiz_id AND qa.status = 'completed'
+        LEFT JOIN quiz_attempts qa ON q.quiz_id = qa.quiz_id AND qa.status = 'submitted'
         WHERE s.subject_id = $1
         GROUP BY s.subject_id
       `, [subjectId]);
@@ -345,7 +345,7 @@ export const subjectService = {
         JOIN quizzes q ON qa.quiz_id = q.quiz_id
         WHERE q.subject_id = $1 
           AND qa.start_time >= NOW() - INTERVAL '6 months'
-          AND qa.status = 'completed'
+          AND qa.status = 'submitted'
         GROUP BY month
         ORDER BY month DESC
       `, [subjectId]);

@@ -8,12 +8,14 @@ const router = express.Router();
 router.get("/", quizController.getAll);
 router.get("/popular", quizController.getPopular);
 router.get("/recent", quizController.getRecent);
-router.get("/:id", quizController.getById);
 router.get("/code/:code", quizController.getByCode);
-router.get("/:id/full", quizController.getQuizWithQuestions);
+router.get("/:id", quizController.getById);
 
 // Protected routes
 router.use(authenticate);
+
+// Quiz with questions - requires authentication
+router.get("/:id/full", quizController.getQuizWithQuestions);
 
 router.post("/", quizController.create);
 router.post("/with-questions", quizController.createWithQuestions);

@@ -92,7 +92,7 @@ export const QuizAttemptModel = {
                COUNT(qa.attempt_id) as total_attempts,
                AVG(qa.total_score) as average_score,
                MAX(qa.total_score) as highest_score,
-               COUNT(CASE WHEN qa.status = 'completed' THEN 1 END) as completed_attempts
+               COUNT(CASE WHEN qa.status = 'submitted' THEN 1 END) as completed_attempts
              FROM quiz_attempts qa
              WHERE qa.user_id = $1`,
             [userId]

@@ -21,7 +21,7 @@ const MyQuizzesPage = () => {
       setLoading(true);
       const [createdRes, assignedRes, dashboardRes] = await Promise.all([
         studentAPI.getMyCreatedQuizzes(),
-        studentAPI.getQuizzes({ status: 'all' }),
+        studentAPI.getQuizzes(),
         studentAPI.getDashboard()
       ]);
 

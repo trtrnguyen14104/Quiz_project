@@ -39,24 +39,8 @@ const StudentDashboard = () => {
 
   const QuizCard = ({ quiz }) => {
     const handleQuizClick = () => {
-      if (quiz.completed) {
-        // Check if max_attempts is set (not null/undefined) and reached limit
-        const hasMaxAttempts = quiz.max_attempts !== null && quiz.max_attempts !== undefined;
-        const reachedLimit = hasMaxAttempts && quiz.user_attempts_count >= quiz.max_attempts;
-
-        if (reachedLimit) {
-          // Reached max attempts, go to latest result
-          if (quiz.latest_attempt_id) {
-            navigate(`/student/result/${quiz.latest_attempt_id}`);
-          }
-        } else {
-          // Can attempt again (either no limit or still has attempts left)
-          navigate(`/student/quiz/${quiz.quiz_id}`);
-        }
-      } else {
-        // Not completed yet, go to description page
-        navigate(`/student/quiz/${quiz.quiz_id}`);
-      }
+      // Always navigate to QuizDescriptionPage
+      navigate(`/student/quiz/${quiz.quiz_id}`);
     };
 
     return (
@@ -147,7 +131,7 @@ const StudentDashboard = () => {
                   <h2 className="text-[#111418] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
                     Quiz được giao
                   </h2>
-                  <button
+                  <button 
                     onClick={() => navigate('/student/my-quizzes')}
                     className="text-primary dark:text-primary-400 text-sm font-bold hover:underline"
                   >

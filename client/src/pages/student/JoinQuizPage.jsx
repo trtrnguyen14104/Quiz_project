@@ -57,7 +57,7 @@ const JoinQuizPage = () => {
 
                   <div className="flex gap-4">
                     <Button type="submit">
-                      Bắt đầu Quiz
+                      Tham gia
                     </Button>
                     <Button
                       type="button"

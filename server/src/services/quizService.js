@@ -102,7 +102,6 @@ export const quizService = {
         };
       }
 
-      // Đếm số câu hỏi và số lần làm
       const stats = await pool.query(`
         SELECT 
           COUNT(DISTINCT q.question_id) as question_count,
@@ -110,7 +109,7 @@ export const quizService = {
           AVG(qa.total_score) as average_score
         FROM quizzes qz
         LEFT JOIN questions q ON qz.quiz_id = q.quiz_id AND q.deleted_at IS NULL
-        LEFT JOIN quiz_attempts qa ON qz.quiz_id = qa.quiz_id AND qa.status = 'completed'
+        LEFT JOIN quiz_attempts qa ON qz.quiz_id = qa.quiz_id AND qa.status = 'submitted'
         WHERE qz.quiz_id = $1
         GROUP BY qz.quiz_id
       `, [quizId]);
@@ -175,7 +174,7 @@ export const quizService = {
       if (userId) {
         const attemptQuery = await pool.query(
           `SELECT
-            COUNT(*) as user_attempts_count,
+            COUNT(*)::int as user_attempts_count,
             (SELECT attempt_id FROM quiz_attempts
              WHERE quiz_id = $1 AND user_id = $2 AND status = 'submitted'
              ORDER BY end_time DESC LIMIT 1) as latest_attempt_id

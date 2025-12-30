@@ -6,3 +6,6 @@ ADD COLUMN result_mode VARCHAR(20) DEFAULT 'exam' CHECK (result_mode IN ('practi
 ALTER TABLE class_quizzes
 ADD COLUMN result_mode VARCHAR(20) DEFAULT 'exam' CHECK (result_mode IN ('practice', 'exam')),
 ADD COLUMN max_attempts INT DEFAULT NULL;
+
+ALTER TABLE class_quizzes
+ADD COLUMN user_attempts_count INT DEFAULT NULL;

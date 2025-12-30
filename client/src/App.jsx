@@ -12,10 +12,12 @@
   import JoinClassPage from './pages/student/JoinClassPage.jsx';
   import JoinQuizPage from './pages/student/JoinQuizPage.jsx';
   import MyQuizzesPage from './pages/student/MyQuizzesPage.jsx';
+  import QuizLibraryPage from './pages/student/QuizLibraryPage.jsx';
   import ResultsPage from './pages/student/ResultsPage.jsx';
   import ClassesPage from './pages/student/ClassesPage.jsx';
   import QuizDescriptionPage from './pages/student/QuizDescriptionPage.jsx';
   import QuizTakingPage from './pages/student/QuizTakingPage.jsx';
+  import QuizResultPage from './pages/student/QuizResultPage.jsx';
   import StudentClassDetailPage from './pages/student/ClassDetailPage.jsx';
 
   // Teacher Pages
@@ -72,6 +74,14 @@
             }
           />
           <Route
+            path="/student/quiz-library"
+            element={
+              <PrivateRoute>
+                <QuizLibraryPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/student/results"
             element={
               <PrivateRoute>
@@ -100,6 +110,14 @@
             element={
               <PrivateRoute>
                 <QuizTakingPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/student/result/:attempt_id"
+            element={
+              <PrivateRoute>
+                <QuizResultPage />
               </PrivateRoute>
             }
           />
