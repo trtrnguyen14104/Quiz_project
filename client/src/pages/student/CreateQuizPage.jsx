@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import TeacherSidebar from '../../components/dashboard/teacher/TeacherSidebar.jsx';
+import StudentSidebar from '../../components/dashboard/student/StudentSidebar.jsx';
 import Button from '../../components/common/Button.jsx';
-import { teacherAPI, commonAPI } from '../../services/api.js';
+import { studentAPI, commonAPI } from '../../services/api.js';
 
 const CreateQuizPage = () => {
   const navigate = useNavigate();
@@ -127,11 +127,11 @@ const CreateQuizPage = () => {
         questions,
       };
 
-      const response = await teacherAPI.createQuiz(payload);
+      const response = await studentAPI.createQuiz(payload);
 
       if (response.data.wasSuccessful) {
         alert('Tạo quiz thành công!');
-        navigate('/teacher/quizzes');
+        navigate('/student/my-quizzes');
       } else {
         alert(response.data.message || 'Có lỗi xảy ra');
       }
@@ -146,7 +146,7 @@ const CreateQuizPage = () => {
   return (
     <div className="font-display bg-background-light dark:bg-background-dark min-h-screen">
       <div className="flex min-h-screen">
-        <TeacherSidebar user={user} />
+        <StudentSidebar user={user} />
 
         <main className="flex-1 flex flex-col">
           <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-white/10 px-10 py-3 bg-white dark:bg-background-dark">

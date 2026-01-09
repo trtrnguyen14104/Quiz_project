@@ -11,7 +11,7 @@ const QuizTakingPage = () => {
   const [quiz, setQuiz] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [answerFeedback, setAnswerFeedback] = useState({}); // For practice mode
+  const [answerFeedback, setAnswerFeedback] = useState({}); 
   const [timeLeft, setTimeLeft] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
@@ -45,10 +45,9 @@ const QuizTakingPage = () => {
       setQuiz(quizData);
 
       if (quizData.time_limit) {
-        setTimeLeft(quizData.time_limit * 60); // Convert to seconds
+        setTimeLeft(quizData.time_limit * 60); 
       }
 
-      // Start attempt
       const attemptResponse = await studentAPI.startAttempt(quiz_id);
       if (attemptResponse.data.wasSuccessful) {
         setAttemptId(attemptResponse.data.result.attempt_id);
@@ -75,18 +74,15 @@ const QuizTakingPage = () => {
     setAnswers(newAnswers);
 
     try {
-      // Lấy answer_id từ answerIndex
       const currentQ = quiz.questions.find(q => q.question_id === questionId);
       const selectedAnswer = currentQ.answers[answerIndex];
 
-      // Submit answer to backend
       const response = await studentAPI.submitAnswer(attemptId, {
         question_id: questionId,
         answer_id: selectedAnswer.answer_id,
-        time_taken: 0 // TODO: Track actual time
+        time_taken: 0
       });
 
-      // Practice mode: Show feedback immediately
       if (quiz.result_mode === 'practice' && response.data.result?.is_correct !== null) {
         const correctAnswerIndex = currentQ.answers.findIndex(a => a.is_correct);
         setAnswerFeedback({
@@ -100,7 +96,6 @@ const QuizTakingPage = () => {
       }
     } catch (error) {
       console.error('Lỗi khi submit answer:', error);
-      // Rollback UI if failed
       const rollbackAnswers = { ...answers };
       delete rollbackAnswers[questionId];
       setAnswers(rollbackAnswers);
@@ -190,7 +185,6 @@ const QuizTakingPage = () => {
 
           <div className="flex-1 p-10">
             <div className="max-w-4xl mx-auto">
-              {/* Progress Bar */}
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -210,7 +204,6 @@ const QuizTakingPage = () => {
                 </div>
               </div>
 
-              {/* Question Card */}
               <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-8 mb-6">
                 <div className="flex justify-between items-start mb-6">
                   <h2 className="text-2xl font-bold text-[#111418] dark:text-white flex-1">
@@ -223,7 +216,6 @@ const QuizTakingPage = () => {
                   )}
                 </div>
 
-                {/* Practice mode feedback */}
                 {quiz.result_mode === 'practice' && currentFeedback && (
                   <div className={`mb-4 p-4 rounded-lg ${
                     currentFeedback.isCorrect
@@ -282,7 +274,6 @@ const QuizTakingPage = () => {
                 </div>
               </div>
 
-              {/* Navigation Buttons */}
               <div className="flex justify-between items-center">
                 <Button
                   variant="secondary"
@@ -297,12 +288,12 @@ const QuizTakingPage = () => {
                     <button
                       key={index}
                       onClick={() => setCurrentQuestion(index)}
-                      className={`w-10 h-10 rounded-lg font-medium flex-shrink-0 ${
+                      className={`w-10 h-10 rounded-lg font-medium flex-shrink-0 border-2 transition-all ${
                         index === currentQuestion
-                          ? 'bg-primary text-white'
+                          ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-300'
                           : answers[quiz.questions[index].question_id] !== undefined
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                          ? 'bg-green-500 text-white border-green-500 hover:bg-green-600'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
                       }`}
                     >
                       {index + 1}

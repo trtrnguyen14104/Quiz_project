@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentSidebar from '../../components/dashboard/student/StudentSidebar.jsx';
+import Button from '../../components/common/Button.jsx';
 import { studentAPI } from '../../services/api.js';
 
 const ResultsPage = () => {
@@ -8,20 +9,37 @@ const ResultsPage = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+  });
 
   useEffect(() => {
     fetchResults();
-  }, []);
+  }, [pagination.page]);
 
   const fetchResults = async () => {
     try {
-      const response = await studentAPI.getResults();
+      const response = await studentAPI.getResults({
+        page: pagination.page,
+        limit: pagination.limit,
+      });
       setResults(response.data.result.attempts);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.data.result.total || response.data.result.attempts?.length || 0,
+      }));
     } catch (error) {
       console.error('Lỗi khi tải kết quả:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination((prev) => ({ ...prev, page: newPage }));
+    window.scrollTo(0, 0);
   };
 
   const getScoreColor = (score) => {
@@ -146,6 +164,59 @@ const ResultsPage = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination */}
+                {Math.ceil(pagination.total / pagination.limit) > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-6">
+                    <Button
+                      variant="secondary"
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page === 1}
+                    >
+                      Trước
+                    </Button>
+
+                    <div className="flex gap-2">
+                      {[...Array(Math.ceil(pagination.total / pagination.limit))].map((_, index) => {
+                        const pageNum = index + 1;
+                        const totalPages = Math.ceil(pagination.total / pagination.limit);
+                        if (
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          (pageNum >= pagination.page - 1 && pageNum <= pagination.page + 1)
+                        ) {
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`w-10 h-10 rounded-lg font-medium ${
+                                pageNum === pagination.page
+                                  ? 'bg-primary text-white'
+                                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        } else if (
+                          pageNum === pagination.page - 2 ||
+                          pageNum === pagination.page + 2
+                        ) {
+                          return <span key={pageNum} className="text-gray-500">...</span>;
+                        }
+                        return null;
+                      })}
+                    </div>
+
+                    <Button
+                      variant="secondary"
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page === Math.ceil(pagination.total / pagination.limit)}
+                    >
+                      Sau
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

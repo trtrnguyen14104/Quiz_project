@@ -68,6 +68,21 @@ const QuizDescriptionPage = () => {
     }
   };
 
+  const handleDeleteQuiz = async () => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa quiz này?')) {
+      return;
+    }
+
+    try {
+      await studentAPI.deleteQuiz(quiz_id);
+      alert('Xóa quiz thành công!');
+      navigate('/student/my-quizzes');
+    } catch (error) {
+      console.error('Lỗi khi xóa quiz:', error);
+      alert('Không thể xóa quiz. Vui lòng thử lại.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
@@ -94,12 +109,30 @@ const QuizDescriptionPage = () => {
         <main className="flex-1 flex flex-col">
           <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-white/10 px-10 py-3 bg-white dark:bg-background-dark">
             <h1 className="text-[#111418] dark:text-white text-xl font-bold">Thông tin Quiz</h1>
-            <button
-              onClick={() => navigate(-1)}
-              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-            >
-              Quay lại
-            </button>
+            <div className="flex items-center gap-3">
+              {quiz && quiz.creator_id === user?.user_id && (
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/student/quiz/${quiz_id}/edit`)}
+                  >
+                    Sửa Quiz
+                  </Button>
+                  <button
+                    onClick={handleDeleteQuiz}
+                    className="px-4 py-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
+                  >
+                    Xóa Quiz
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => navigate(-1)}
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              >
+                Quay lại
+              </button>
+            </div>
           </header>
 
           <div className="flex-1 p-10">

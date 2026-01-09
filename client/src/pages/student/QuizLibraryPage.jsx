@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentSidebar from '../../components/dashboard/student/StudentSidebar.jsx';
 import Button from '../../components/common/Button.jsx';
+import QuizCard from '../../components/quiz/QuizCard.jsx';
 import api from '../../services/api.js';
 
 const QuizLibraryPage = () => {
@@ -72,24 +73,6 @@ const QuizLibraryPage = () => {
   const handlePageChange = (newPage) => {
     setPagination((prev) => ({ ...prev, page: newPage }));
     window.scrollTo(0, 0);
-  };
-
-  const getDifficultyBadge = (level) => {
-    const badges = {
-      easy: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-      medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-      hard: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-    };
-    const labels = {
-      easy: 'Dễ',
-      medium: 'Trung bình',
-      hard: 'Khó',
-    };
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badges[level]}`}>
-        {labels[level]}
-      </span>
-    );
   };
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
@@ -177,50 +160,12 @@ const QuizLibraryPage = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {quizzes.map((quiz) => (
-                    <div
+                    <QuizCard
                       key={quiz.quiz_id}
-                      className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                      quiz={quiz}
+                      variant="standard"
                       onClick={() => navigate(`/student/quiz/${quiz.quiz_id}`)}
-                    >
-                      {quiz.cover_image_url && (
-                        <div className="h-40 overflow-hidden">
-                          <img
-                            src={quiz.cover_image_url}
-                            alt={quiz.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-lg font-bold text-[#111418] dark:text-white line-clamp-2 flex-1">
-                            {quiz.title}
-                          </h3>
-                        </div>
-
-                        {quiz.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                            {quiz.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center gap-2 mb-3">
-                          {getDifficultyBadge(quiz.difficulty_level)}
-                          {quiz.subject_name && (
-                            <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-full text-xs font-semibold">
-                              {quiz.subject_name}
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                          <span>{quiz.attempt_count || 0} lượt làm</span>
-                          <span className="font-semibold text-[#111418] dark:text-white">
-                            {quiz.total_score} điểm
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    />
                   ))}
                 </div>
               )}

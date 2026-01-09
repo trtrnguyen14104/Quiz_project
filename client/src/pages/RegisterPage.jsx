@@ -177,7 +177,7 @@ const RegisterPage = () => {
               />
 
               <Button type="submit" size="lg" disabled={loading}>
-                {loading ? 'Registering...' : 'Register'}
+                {loading ? 'Đang tải...' : 'Đăng ký'}
               </Button>
             </form>
           </div>

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import TeacherSidebar from '../../components/dashboard/teacher/TeacherSidebar.jsx';
 import Button from '../../components/common/Button.jsx';
 import { teacherAPI, commonAPI } from '../../services/api.js';
 
-const CreateQuizPage = () => {
+const EditQuizPage = () => {
+  const { quiz_id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [subjects, setSubjects] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [quizData, setQuizData] = useState({
     title: '',
@@ -33,15 +35,62 @@ const CreateQuizPage = () => {
   ]);
 
   useEffect(() => {
-    fetchSubjects();
-  }, []);
+    fetchData();
+  }, [quiz_id]);
 
-  const fetchSubjects = async () => {
+  const fetchData = async () => {
     try {
-      const response = await commonAPI.getSubjects();
-      setSubjects(response.data.result || []);
+      const [subjectsResponse, quizResponse] = await Promise.all([
+        commonAPI.getSubjects(),
+        teacherAPI.getQuizWithQuestions(quiz_id)
+      ]);
+
+      setSubjects(subjectsResponse.data.result || []);
+
+      const quiz = quizResponse.data.result;
+
+      // Kiểm tra quyền sở hữu
+      if (quiz.creator_id !== user?.user_id) {
+        alert('Bạn không có quyền chỉnh sửa quiz này');
+        navigate('/teacher/quizzes');
+        return;
+      }
+
+      // Set quiz data
+      setQuizData({
+        title: quiz.title || '',
+        description: quiz.description || '',
+        subject_id: quiz.subject_id || '',
+        difficulty_level: quiz.difficulty_level || 'medium',
+        access_level: quiz.access_level || 'public',
+        result_mode: quiz.result_mode || 'exam',
+      });
+
+      // Set questions data
+      if (quiz.questions && quiz.questions.length > 0) {
+        const formattedQuestions = quiz.questions.map(q => ({
+          content: q.content || '',
+          points: q.points || 1,
+          answers: q.answers && q.answers.length > 0
+            ? q.answers.map(a => ({
+                content: a.content || '',
+                is_correct: a.is_correct || false
+              }))
+            : [
+                { content: '', is_correct: false },
+                { content: '', is_correct: false },
+                { content: '', is_correct: false },
+                { content: '', is_correct: false },
+              ]
+        }));
+        setQuestions(formattedQuestions);
+      }
     } catch (error) {
-      console.error('Lỗi khi tải danh sách môn học:', error);
+      console.error('Lỗi khi tải dữ liệu:', error);
+      alert('Không thể tải thông tin quiz. Vui lòng thử lại.');
+      navigate('/teacher/quizzes');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,7 +168,7 @@ const CreateQuizPage = () => {
       }
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       const payload = {
@@ -127,21 +176,29 @@ const CreateQuizPage = () => {
         questions,
       };
 
-      const response = await teacherAPI.createQuiz(payload);
+      const response = await teacherAPI.updateQuiz(quiz_id, payload);
 
       if (response.data.wasSuccessful) {
-        alert('Tạo quiz thành công!');
+        alert('Cập nhật quiz thành công!');
         navigate('/teacher/quizzes');
       } else {
         alert(response.data.message || 'Có lỗi xảy ra');
       }
     } catch (error) {
-      console.error('Lỗi khi tạo quiz:', error);
-      alert('Có lỗi xảy ra khi tạo quiz');
+      console.error('Lỗi khi cập nhật quiz:', error);
+      alert('Có lỗi xảy ra khi cập nhật quiz');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="font-display bg-background-light dark:bg-background-dark min-h-screen">
@@ -150,7 +207,7 @@ const CreateQuizPage = () => {
 
         <main className="flex-1 flex flex-col">
           <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-white/10 px-10 py-3 bg-white dark:bg-background-dark">
-            <h1 className="text-[#111418] dark:text-white text-xl font-bold">Tạo Quiz Mới</h1>
+            <h1 className="text-[#111418] dark:text-white text-xl font-bold">Chỉnh sửa Quiz</h1>
             <button
               onClick={() => navigate(-1)}
               className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
@@ -366,8 +423,8 @@ const CreateQuizPage = () => {
                 <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
                   Hủy
                 </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Đang tạo...' : 'Tạo Quiz'}
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? 'Đang cập nhật...' : 'Cập nhật Quiz'}
                 </Button>
               </div>
             </form>
@@ -378,4 +435,4 @@ const CreateQuizPage = () => {
   );
 };
 
-export default CreateQuizPage;
+export default EditQuizPage;

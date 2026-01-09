@@ -20,18 +20,32 @@ const TeacherClassDetailPage = () => {
 
   const fetchClassDetail = async () => {
     try {
-      const [classesRes, quizzesRes] = await Promise.all([
-        teacherAPI.getClasses(),
-        teacherAPI.getQuizzes(),
+      const [classRes, quizzesRes, membersRes] = await Promise.all([
+        teacherAPI.getClassDetail(classId),
+        teacherAPI.getClassQuizzes(classId),
+        teacherAPI.getClassMembers(classId)
       ]);
 
-      const foundClass = classesRes.data.find((c) => c.id === parseInt(classId));
-      setClassData(foundClass);
+      console.log('Class response:', classRes.data);
+      console.log('Quizzes response:', quizzesRes.data);
+      console.log('Members response:', membersRes.data);
 
-      const classQuizzes = quizzesRes.data.filter((q) => q.classId === parseInt(classId));
-      setQuizzes(classQuizzes);
+      if (classRes.data.wasSuccessful) {
+        setClassData(classRes.data.result);
+      } else {
+        console.error('Không tìm thấy lớp:', classRes.data);
+      }
+
+      if (quizzesRes.data.wasSuccessful) {
+        setQuizzes(quizzesRes.data.result || []);
+      }
+
+      if (membersRes.data.wasSuccessful) {
+        setStudents(membersRes.data.result || []);
+      }
     } catch (error) {
       console.error('Lỗi khi tải chi tiết lớp:', error);
+      console.error('Error details:', error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -48,6 +62,17 @@ const TeacherClassDetailPage = () => {
     } catch (error) {
       console.error('Lỗi khi xóa lớp:', error);
       alert('Không thể xóa lớp. Vui lòng thử lại.');
+    }
+  };
+
+  const handleRemoveStudent = async (memberId) => {
+    try {
+      await teacherAPI.removeMemberFromClass(classId, memberId);
+      alert('Xóa học sinh khỏi lớp thành công!');
+      fetchClassDetail(); // Refresh data
+    } catch (error) {
+      console.error('Lỗi khi xóa học sinh:', error);
+      alert('Không thể xóa học sinh. Vui lòng thử lại.');
     }
   };
 
@@ -76,10 +101,10 @@ const TeacherClassDetailPage = () => {
           <header className="flex items-center justify-between whitespace-nowrap border-b border-gray-200 dark:border-gray-700 px-10 py-3 bg-white dark:bg-[#18232f] sticky top-0 z-10">
             <div>
               <h1 className="text-[#111418] dark:text-white text-lg font-bold">
-                {classData.name}
+                {classData.class_name}
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Mã lớp: {classData.code}
+                Mã lớp: {classData.class_code}
               </p>
             </div>
             <div className="flex gap-2">
@@ -101,7 +126,7 @@ const TeacherClassDetailPage = () => {
               <div className="bg-white dark:bg-[#18232f] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Số học sinh</p>
                 <p className="text-3xl font-bold text-[#111418] dark:text-white">
-                  {classData.studentCount}
+                  {classData.member_count || students.length}
                 </p>
               </div>
               <div className="bg-white dark:bg-[#18232f] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
@@ -144,7 +169,7 @@ const TeacherClassDetailPage = () => {
                     : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
-                Học sinh ({classData.studentCount})
+                Học sinh ({classData.member_count || students.length})
               </button>
               <button
                 onClick={() => setActiveTab('analytics')}
@@ -200,33 +225,27 @@ const TeacherClassDetailPage = () => {
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                         {quizzes.map((quiz) => (
-                          <tr key={quiz.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                          <tr key={quiz.quiz_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
                             <td className="px-6 py-4 font-medium text-[#111418] dark:text-white">
                               {quiz.title}
                             </td>
                             <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
-                              {quiz.questionCount}
+                              {quiz.question_count || '-'}
                             </td>
                             <td className="px-6 py-4">
                               <span
                                 className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  quiz.status === 'live'
+                                  quiz.status === 'active'
                                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400'
-                                    : quiz.status === 'graded'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400'
                                     : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                                 }`}
                               >
-                                {quiz.status === 'live'
-                                  ? 'Đang diễn ra'
-                                  : quiz.status === 'graded'
-                                  ? 'Đã chấm'
-                                  : 'Nháp'}
+                                {quiz.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
                               </span>
                             </td>
                             <td className="px-6 py-4">
                               <button
-                                onClick={() => navigate(`/teacher/quiz/${quiz.id}`)}
+                                onClick={() => navigate(`/teacher/quiz/${quiz.quiz_id}`)}
                                 className="text-primary font-medium hover:underline"
                               >
                                 Xem chi tiết
@@ -242,10 +261,81 @@ const TeacherClassDetailPage = () => {
             )}
 
             {activeTab === 'students' && (
-              <div className="bg-white dark:bg-[#18232f] border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-                <p className="text-gray-500 dark:text-gray-400 text-center py-10">
-                  Danh sách học sinh sẽ được hiển thị ở đây
-                </p>
+              <div>
+                {students.length === 0 ? (
+                  <div className="text-center py-20">
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                      Chưa có học sinh nào trong lớp này
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-white dark:bg-[#18232f] border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 dark:bg-gray-800/50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            Tên học sinh
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            Email
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            Ngày tham gia
+                          </th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-400">
+                            Hành động
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {students.map((student) => (
+                          <tr key={student.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                {student.avatar_url ? (
+                                  <img
+                                    src={student.avatar_url}
+                                    alt={student.user_name}
+                                    className="w-10 h-10 rounded-full"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <span className="text-primary font-medium">
+                                      {student.user_name?.[0]?.toUpperCase()}
+                                    </span>
+                                  </div>
+                                )}
+                                <span className="font-medium text-[#111418] dark:text-white">
+                                  {student.user_name}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                              {student.email}
+                            </td>
+                            <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                              {student.joined_at
+                                ? new Date(student.joined_at).toLocaleDateString('vi-VN')
+                                : '-'}
+                            </td>
+                            <td className="px-6 py-4">
+                              <button
+                                onClick={() => {
+                                  if (confirm(`Bạn có chắc muốn xóa ${student.user_name} khỏi lớp?`)) {
+                                    handleRemoveStudent(student.member_id);
+                                  }
+                                }}
+                                className="text-red-600 font-medium hover:underline"
+                              >
+                                Xóa
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 

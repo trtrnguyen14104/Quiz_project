@@ -19,10 +19,6 @@ const TeacherSidebar = ({ user }) => {
       path: '/teacher/quizzes',
       label: 'Quiz của tôi',
     },
-    // {
-    //   path: '/teacher/reports',
-    //   label: 'Thống kê',
-    // },
   ];
 
   // Kiểm tra menu item có đang active không
@@ -87,14 +83,14 @@ const TeacherSidebar = ({ user }) => {
 
           {/* Optional: Settings & Logout */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
-            <div
+            {/* <div
               onClick={() => navigate('/teacher/settings')}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 cursor-pointer"
             >
               <p className="text-[#111418] dark:text-gray-300 text-sm font-medium">
-                Cài đặt
+                Cài đặt thông tin
               </p>
-            </div>
+            </div> */}
             
             <div
               onClick={() => {

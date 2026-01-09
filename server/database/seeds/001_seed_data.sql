@@ -738,18 +738,6 @@ INSERT INTO answers (question_id, content, is_correct, answer_order) VALUES
 (63, 'v = at', FALSE, 3),
 (63, 'v = v₀/t', FALSE, 4);
 
-INSERT INTO answers (question_id, content, is_correct, answer_order) VALUES
-(64, '4 m/s²', TRUE, 1),
-(64, '2 m/s²', FALSE, 2),
-(64, '5 m/s²', FALSE, 3),
-(64, '100 m/s²', FALSE, 4);
-
-INSERT INTO answers (question_id, content, is_correct, answer_order) VALUES
-(65, 's = v₀t + ½at²', TRUE, 1),
-(65, 's = vt', FALSE, 2),
-(65, 's = at²', FALSE, 3),
-(65, 's = v₀ + at', FALSE, 4);
-
 -- =============================================
 -- 11. QUIZ ATTEMPTS (Lượt làm bài)
 -- =============================================

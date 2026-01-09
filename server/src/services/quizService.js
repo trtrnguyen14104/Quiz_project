@@ -360,6 +360,118 @@ export const quizService = {
     }
   },
 
+  async updateWithQuestions(quizId, data) {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      // Kiểm tra quiz tồn tại
+      const quizCheck = await client.query(
+        'SELECT * FROM quizzes WHERE quiz_id = $1',
+        [quizId]
+      );
+
+      if (quizCheck.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return {
+          wasSuccessful: false,
+          message: "Không tìm thấy quiz",
+        };
+      }
+
+      const {
+        title, description, cover_image_url, subject_id, topic_id,
+        category_id, difficulty_level, access_level, result_mode, questions
+      } = data;
+
+      // Cập nhật thông tin quiz
+      const quizResult = await client.query(
+        `UPDATE quizzes SET
+          title = COALESCE($1, title),
+          description = COALESCE($2, description),
+          cover_image_url = COALESCE($3, cover_image_url),
+          subject_id = COALESCE($4, subject_id),
+          topic_id = $5,
+          category_id = $6,
+          difficulty_level = COALESCE($7, difficulty_level),
+          access_level = COALESCE($8, access_level),
+          result_mode = COALESCE($9, result_mode),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE quiz_id = $10
+        RETURNING *`,
+        [title, description, cover_image_url, subject_id, topic_id,
+         category_id, difficulty_level, access_level, result_mode, quizId]
+      );
+
+      const quiz = quizResult.rows[0];
+
+      // Xóa tất cả câu hỏi và đáp án cũ
+      await client.query('DELETE FROM answers WHERE question_id IN (SELECT question_id FROM questions WHERE quiz_id = $1)', [quizId]);
+      await client.query('DELETE FROM questions WHERE quiz_id = $1', [quizId]);
+
+      // Tạo lại questions và answers
+      const createdQuestions = [];
+      let totalScore = 0;
+
+      if (questions && questions.length > 0) {
+        for (let i = 0; i < questions.length; i++) {
+          const q = questions[i];
+
+          const questionResult = await client.query(
+            `INSERT INTO questions (quiz_id, content, image_url, question_order, points, time_limit)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING *`,
+            [quiz.quiz_id, q.content, q.image_url, i + 1, q.points || 1, q.time_limit || 15]
+          );
+
+          const question = questionResult.rows[0];
+          totalScore += question.points;
+
+          // Tạo answers
+          const createdAnswers = [];
+          if (q.answers && q.answers.length > 0) {
+            for (let j = 0; j < q.answers.length; j++) {
+              const answerResult = await client.query(
+                `INSERT INTO answers (question_id, content, is_correct, answer_order)
+                 VALUES ($1, $2, $3, $4)
+                 RETURNING *`,
+                [question.question_id, q.answers[j].content, q.answers[j].is_correct, j + 1]
+              );
+              createdAnswers.push(answerResult.rows[0]);
+            }
+          }
+
+          createdQuestions.push({ ...question, answers: createdAnswers });
+        }
+
+        // Cập nhật total_score
+        await client.query(
+          'UPDATE quizzes SET total_score = $1 WHERE quiz_id = $2',
+          [totalScore, quiz.quiz_id]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      return {
+        wasSuccessful: true,
+        message: "Cập nhật quiz với câu hỏi thành công",
+        result: {
+          ...quiz,
+          total_score: totalScore,
+          questions: createdQuestions,
+        },
+      };
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error(error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  },
+
   async delete(quizId) {
     try {
       const quiz = await QuizModel.findById(quizId);

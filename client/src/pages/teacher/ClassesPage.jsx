@@ -80,7 +80,7 @@ const ClassesPage = () => {
                           {cls.class_name}
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {cls.student_count} học sinh
+                          {cls.member_count || 0} học sinh
                         </p>
                       </div>
                       {/* <span className="material-symbols-outlined text-gray-400 text-2xl">
@@ -105,13 +105,7 @@ const ClassesPage = () => {
 
                     <div className="flex gap-2">
                       <button
-                        onClick={() => navigate(`/teacher/class/${cls.id}`)}
-                        className="flex-1 rounded-lg h-9 px-3 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
-                      >
-                        Xem chi tiết
-                      </button>
-                      <button
-                        onClick={() => navigate(`/teacher/class/${cls.id}/manage`)}
+                        onClick={() => navigate(`/teacher/class/${cls.class_id}`)}
                         className="flex-1 rounded-lg h-9 px-3 bg-[#f0f2f4] dark:bg-[#101922] text-[#111418] dark:text-white text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
                       >
                         Quản lý
@@ -120,7 +114,7 @@ const ClassesPage = () => {
 
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Mã lớp: <span className="font-mono font-bold">{cls.code}</span>
+                        Mã lớp: <span className="font-mono font-bold">{cls.class_code}</span>
                       </p>
                     </div>
                   </div>

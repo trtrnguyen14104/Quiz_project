@@ -14,6 +14,7 @@ router.get("/dashboard", adminController.getDashboard);
 // User management
 router.get("/users", adminController.getAllUsers);
 router.get("/users/:id", adminController.getUserById);
+router.post("/users", adminController.createUser);
 router.put("/users/:id", adminController.updateUser);
 router.delete("/users/:id", adminController.deleteUser);
 

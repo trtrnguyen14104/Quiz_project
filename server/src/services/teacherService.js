@@ -136,8 +136,8 @@ export const teacherService = {
           c.description,
           s.subject_name,
           c.status,
-          (SELECT COUNT(*) FROM class_members WHERE class_id = c.class_id AND status = 'active') as student_count,
-          (SELECT COUNT(*) FROM class_quizzes WHERE class_id = c.class_id) as quiz_count,
+          (SELECT COUNT(*)::int FROM class_members WHERE class_id = c.class_id AND status = 'active') as member_count,
+          (SELECT COUNT(*)::int FROM class_quizzes WHERE class_id = c.class_id) as quiz_count,
           (SELECT COALESCE(ROUND(AVG(qa.total_score / q.total_score * 100), 2), 0)
            FROM class_quizzes cq
            JOIN quiz_attempts qa ON cq.quiz_id = qa.quiz_id

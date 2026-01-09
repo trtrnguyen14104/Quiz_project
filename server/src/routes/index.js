@@ -10,14 +10,11 @@ import subjectRoutes from "./subjectRoutes.js";
 import topicRoutes from "./topicRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import reportRoutes from "./reportRoutes.js";
-import uploadRoutes from "./uploadRoutes.js";
-import excelRoutes from "./excelRoutes.js";
 import studentRoutes from "./studentRoutes.js";
 import teacherRoutes from "./teacherRoutes.js";
 
 const router = express.Router();
 
-// API routes
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/quizzes", quizRoutes);
@@ -31,8 +28,6 @@ router.use("/admin", adminRoutes);
 router.use("/student", studentRoutes);
 router.use("/teacher", teacherRoutes);
 router.use("/reports", reportRoutes);
-// router.use("/upload", uploadRoutes);
-// router.use("/excel", excelRoutes);
 
 // Health check
 router.get("/health", (req, res) => {

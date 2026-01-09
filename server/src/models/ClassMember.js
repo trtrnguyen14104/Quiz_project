@@ -68,4 +68,22 @@ export const ClassMemberModel = {
     );
     return result.rows[0];
   },
+
+  async countByClass(classId) {
+    const result = await pool.query(
+      `SELECT COUNT(*)::int as count
+       FROM class_members
+       WHERE class_id = $1 AND status = 'active'`,
+      [classId]
+    );
+    return result.rows[0]?.count || 0;
+  },
+
+  async findById(memberId) {
+    const result = await pool.query(
+      `SELECT * FROM class_members WHERE member_id = $1`,
+      [memberId]
+    );
+    return result.rows[0];
+  },
 };

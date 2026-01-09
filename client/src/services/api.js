@@ -61,32 +61,55 @@ export const studentAPI = {
   submitAnswer: (attemptId, data) => api.post(`/attempts/${attemptId}/answer`, data),
   finishAttempt: (attemptId) => api.post(`/attempts/${attemptId}/finish`),
   getAttemptResult: (attemptId) => api.get(`/attempts/${attemptId}/result`),
+
+  // Quiz creation
+  createQuiz: (quizData) => api.post("/quizzes/with-questions", quizData),
+  updateQuiz: (quizId, quizData) => api.put(`/quizzes/${quizId}/with-questions`, quizData),
+  deleteQuiz: (quizId) => api.delete(`/quizzes/${quizId}`),
 };
 
 export const teacherAPI = {
   getDashboard: () => api.get("/teacher/dashboard"),
   getClasses: (params) => api.get("/teacher/classes", { params }),
+  getClassDetail: (id) => api.get(`/classes/${id}`),
+  getClassMembers: (id) => api.get(`/classes/${id}/members`),
+  getClassQuizzes: (id) => api.get(`/classes/${id}/quizzes`),
   getQuizzes: (params) => api.get("/teacher/quizzes", { params }),
+  getQuizWithQuestions: (quizId) => api.get(`/quizzes/${quizId}/full`),
   getStatistics: () => api.get("/teacher/statistics"),
   createClass: (classData) => api.post("/classes", classData),
   updateClass: (id, classData) => api.put(`/classes/${id}`, classData),
   deleteClass: (id) => api.delete(`/classes/${id}`),
-  createQuiz: (quizData) => api.post("/quizzes", quizData),
-  updateQuiz: (id, quizData) => api.put(`/quizzes/${id}`, quizData),
+  assignQuizToClass: (classId, quizData) => api.post(`/classes/${classId}/quizzes`, quizData),
+  removeQuizFromClass: (classId, classQuizId) => api.delete(`/classes/${classId}/quizzes/${classQuizId}`),
+  removeMemberFromClass: (classId, memberId) => api.delete(`/classes/${classId}/members/${memberId}`),
+  createQuiz: (quizData) => api.post("/quizzes/with-questions", quizData),
+  updateQuiz: (quizId, quizData) => api.put(`/quizzes/${quizId}/with-questions`, quizData),
   deleteQuiz: (id) => api.delete(`/quizzes/${id}`),
   getQuestions: () => api.get("/questions"),
   createQuestion: (questionData) => api.post("/questions", questionData),
 };
 
+// Common APIs
+export const commonAPI = {
+  getSubjects: () => api.get("/subjects"),
+  getSubjectTopics: (subjectId) => api.get(`/subjects/${subjectId}/topics`),
+};
+
 export const adminAPI = {
   getDashboard: () => api.get("/admin/dashboard"),
-  getUsers: () => api.get("/admin/users"),
+  getUsers: (params) => api.get("/admin/users", { params }),
+  getUserById: (id) => api.get(`/admin/users/${id}`),
   createUser: (userData) => api.post("/admin/users", userData),
   updateUser: (id, userData) => api.put(`/admin/users/${id}`, userData),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
-  getQuizzes: () => api.get("/admin/quizzes"),
-  getClasses: () => api.get("/admin/classes"),
-  getStats: () => api.get("/admin/stats"),
+  getQuizzes: (params) => api.get("/admin/quizzes", { params }),
+  updateQuiz: (id, quizData) => api.put(`/quizzes/${id}`, quizData),
+  updateQuizStatus: (id, status) => api.put(`/admin/quizzes/${id}/status`, { status }),
+  deleteQuiz: (id) => api.delete(`/admin/quizzes/${id}`),
+  getClasses: (params) => api.get("/admin/classes", { params }),
+  getStatistics: (params) => api.get("/admin/statistics", { params }),
+  getSystemLogs: (params) => api.get("/admin/logs", { params }),
 };
 
 export default api;

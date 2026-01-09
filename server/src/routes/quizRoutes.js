@@ -20,6 +20,7 @@ router.get("/:id/full", quizController.getQuizWithQuestions);
 router.post("/", quizController.create);
 router.post("/with-questions", quizController.createWithQuestions);
 router.put("/:id", quizController.update);
+router.put("/:id/with-questions", quizController.updateWithQuestions);
 router.delete("/:id", quizController.delete);
 router.post("/:id/duplicate", quizController.duplicate);
 router.post("/:id/publish", quizController.publish);

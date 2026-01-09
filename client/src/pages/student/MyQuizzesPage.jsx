@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudentSidebar from '../../components/dashboard/student/StudentSidebar.jsx';
+import QuizCard from '../../components/quiz/QuizCard.jsx';
 import { studentAPI } from '../../services/api.js';
 
 const MyQuizzesPage = () => {
@@ -99,27 +100,25 @@ const MyQuizzesPage = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-[#111418] dark:text-white">Quiz tôi tạo ({createdQuizzes.length})</h2>
-                  <button onClick={() => navigate('/teacher/quizzes/create')} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium">+ Tạo quiz mới</button>
+                  <button onClick={() => navigate('/student/create-quiz')} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium">+ Tạo quiz mới</button>
                 </div>
                 {createdQuizzes.length === 0 ? (
                   <div className="text-center py-16 bg-white dark:bg-background-dark rounded-xl border border-gray-200 dark:border-white/10">
                     <p className="text-gray-500 dark:text-gray-400 mb-4">Bạn chưa tạo quiz nào</p>
-                    <button onClick={() => navigate('/teacher/quizzes/create')} className="text-primary hover:underline">Tạo quiz đầu tiên</button>
+                    <button onClick={() => navigate('/student/create-quiz')} className="text-primary hover:underline">Tạo quiz đầu tiên</button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {createdQuizzes.map((quiz) => (
-                      <div key={quiz.quiz_id} onClick={() => navigate(`/teacher/quizzes/${quiz.quiz_id}`)}
-                        className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                        <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">{quiz.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{quiz.question_count} câu hỏi • {quiz.subject_name}</p>
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${quiz.status === 'published' ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400' : 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'}`}>
-                            {quiz.status === 'published' ? 'Đã xuất bản' : 'Nháp'}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{quiz.total_attempts} lượt làm</span>
-                        </div>
-                      </div>
+                      <QuizCard
+                        key={quiz.quiz_id}
+                        quiz={{
+                          ...quiz,
+                          attempt_count: quiz.total_attempts
+                        }}
+                        variant="compact"
+                        onClick={() => navigate(`/student/quiz/${quiz.quiz_id}`)}
+                      />
                     ))}
                   </div>
                 )}
@@ -136,15 +135,14 @@ const MyQuizzesPage = () => {
                       <p className="text-gray-500 dark:text-gray-400">Không có quiz chưa làm</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {pendingAssigned.map((quiz) => (
-                        <div key={quiz.quiz_id} onClick={() => handleQuizClick(quiz)}
-                          className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                          <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">{quiz.title}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{quiz.question_count} câu hỏi • {quiz.class_name}</p>
-                          <span className="inline-block text-xs font-medium px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400 mt-4">Chưa làm</span>
-                          {quiz.due_date && <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">Hạn: {new Date(quiz.due_date).toLocaleDateString('vi-VN')}</p>}
-                        </div>
+                        <QuizCard
+                          key={quiz.quiz_id}
+                          quiz={quiz}
+                          variant="assigned"
+                          onClick={() => handleQuizClick(quiz)}
+                        />
                       ))}
                     </div>
                   )}
@@ -156,18 +154,14 @@ const MyQuizzesPage = () => {
                       <p className="text-gray-500 dark:text-gray-400">Chưa hoàn thành quiz nào</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {completedAssigned.map((quiz) => (
-                        <div key={quiz.quiz_id} onClick={() => handleQuizClick(quiz)}
-                          className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                          <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">{quiz.title}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{quiz.question_count} câu hỏi • {quiz.class_name}</p>
-                          <div className="flex items-center justify-between mt-4">
-                            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">Đã làm</span>
-                            {quiz.score !== null && quiz.total_score && <span className="text-sm font-bold text-primary">{((quiz.score / quiz.total_score) * 100).toFixed(1)}%</span>}
-                          </div>
-                          {quiz.due_date && <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">Hạn: {new Date(quiz.due_date).toLocaleDateString('vi-VN')}</p>}
-                        </div>
+                        <QuizCard
+                          key={quiz.quiz_id}
+                          quiz={quiz}
+                          variant="assigned"
+                          onClick={() => handleQuizClick(quiz)}
+                        />
                       ))}
                     </div>
                   )}
@@ -184,17 +178,20 @@ const MyQuizzesPage = () => {
                     <p className="text-gray-500 dark:text-gray-400">Bạn chưa tham gia quiz nào</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {recentQuizzes.map((quiz) => (
-                      <div key={quiz.quiz_id} onClick={() => handleQuizClick(quiz)}
-                        className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                        <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">{quiz.title}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{quiz.question_count} câu hỏi • {quiz.subject_name}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(quiz.last_attempt_time).toLocaleDateString('vi-VN')}</span>
-                          <span className="text-lg font-bold text-primary">{((quiz.last_score / quiz.max_score) * 100).toFixed(1)}%</span>
-                        </div>
-                      </div>
+                      <QuizCard
+                        key={quiz.quiz_id}
+                        quiz={{
+                          ...quiz,
+                          completed: true,
+                          score: quiz.last_score,
+                          total_score: quiz.max_score,
+                          completed_at: quiz.last_attempt_time
+                        }}
+                        variant="assigned"
+                        onClick={() => handleQuizClick(quiz)}
+                      />
                     ))}
                   </div>
                 )}

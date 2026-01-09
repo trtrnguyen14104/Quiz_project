@@ -74,12 +74,12 @@ const StudentSidebar = ({ user }) => {
           </Button>
 
           <div className="border-t border-gray-200 dark:border-white/10 pt-2 mt-2">
-            <Link
+            {/* <Link
               to="/student/settings"
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
             >
-              <p className="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal">Cài đặt</p>
-            </Link>
+              <p className="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal">Cài đặt thông tin</p>
+            </Link> */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"

@@ -10,20 +10,43 @@ const QuizzesPage = () => {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, live, draft, graded
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+  });
 
   useEffect(() => {
     fetchQuizzes();
-  }, []);
+  }, [pagination.page, filter]);
 
   const fetchQuizzes = async () => {
     try {
-      const response = await teacherAPI.getQuizzes();
+      const response = await teacherAPI.getQuizzes({
+        page: pagination.page,
+        limit: pagination.limit,
+        status: filter !== 'all' ? filter : undefined,
+      });
       setQuizzes(response.data.result.quizzes);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.data.result.total || response.data.result.quizzes?.length || 0,
+      }));
     } catch (error) {
       console.error('Lỗi khi tải quiz:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination((prev) => ({ ...prev, page: newPage }));
+    window.scrollTo(0, 0);
+  };
+
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const getStatusBadge = (status) => {
@@ -43,11 +66,6 @@ const QuizzesPage = () => {
     };
     return text[status] || 'Nháp';
   };
-
-  const filteredQuizzes = quizzes.filter(quiz => {
-    if (filter === 'all') return true;
-    return quiz.status === filter;
-  });
 
   const handleDeleteQuiz = async (quizId) => {
     if (!confirm('Bạn có chắc muốn xóa quiz này?')) return;
@@ -78,41 +96,41 @@ const QuizzesPage = () => {
             {/* Filter Tabs */}
             <div className="flex gap-4 mb-6">
               <button
-                onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg font-medium ${
+                onClick={() => handleFilterChange('all')}
+                className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${
                   filter === 'all'
-                    ? 'bg-primary text-white'
-                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
                 Tất cả
               </button>
               <button
-                onClick={() => setFilter('live')}
-                className={`px-4 py-2 rounded-lg font-medium ${
+                onClick={() => handleFilterChange('live')}
+                className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${
                   filter === 'live'
-                    ? 'bg-primary text-white'
-                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
                 Đang diễn ra
               </button>
               <button
-                onClick={() => setFilter('draft')}
-                className={`px-4 py-2 rounded-lg font-medium ${
+                onClick={() => handleFilterChange('draft')}
+                className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${
                   filter === 'draft'
-                    ? 'bg-primary text-white'
-                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
                 Nháp
               </button>
               <button
-                onClick={() => setFilter('graded')}
-                className={`px-4 py-2 rounded-lg font-medium ${
+                onClick={() => handleFilterChange('graded')}
+                className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${
                   filter === 'graded'
-                    ? 'bg-primary text-white'
-                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                    : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
                 Đã chấm
@@ -124,7 +142,7 @@ const QuizzesPage = () => {
               <div className="text-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
               </div>
-            ) : filteredQuizzes.length === 0 ? (
+            ) : quizzes.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-gray-500 dark:text-gray-400 mb-4">
                   Không có quiz nào
@@ -160,7 +178,7 @@ const QuizzesPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredQuizzes.map((quiz) => (
+                      {quizzes.map((quiz) => (
                         <tr
                           key={quiz.quiz_id}
                           className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
@@ -185,13 +203,19 @@ const QuizzesPage = () => {
                           <td className="p-4">
                             <div className="flex gap-2">
                               <button
-                                onClick={() => navigate(`/teacher/quiz/${quiz.id}`)}
-                                className="text-primary font-medium text-sm hover:underline"
+                                onClick={() => navigate(`/teacher/quiz/${quiz.quiz_id}`)}
+                                className="text-blue-600 dark:text-blue-400 font-medium text-sm hover:underline"
                               >
-                                {quiz.status === 'graded' ? 'Xem kết quả' : 'Chỉnh sửa'}
+                                Xem
                               </button>
                               <button
-                                onClick={() => handleDeleteQuiz(quiz.id)}
+                                onClick={() => navigate(`/teacher/quiz/${quiz.quiz_id}/edit`)}
+                                className="text-primary font-medium text-sm hover:underline"
+                              >
+                                Sửa
+                              </button>
+                              <button
+                                onClick={() => handleDeleteQuiz(quiz.quiz_id)}
                                 className="text-red-600 font-medium text-sm hover:underline"
                               >
                                 Xóa
@@ -203,6 +227,59 @@ const QuizzesPage = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {Math.ceil(pagination.total / pagination.limit) > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                <Button
+                  variant="secondary"
+                  onClick={() => handlePageChange(pagination.page - 1)}
+                  disabled={pagination.page === 1}
+                >
+                  Trước
+                </Button>
+
+                <div className="flex gap-2">
+                  {[...Array(Math.ceil(pagination.total / pagination.limit))].map((_, index) => {
+                    const pageNum = index + 1;
+                    const totalPages = Math.ceil(pagination.total / pagination.limit);
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= pagination.page - 1 && pageNum <= pagination.page + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-10 h-10 rounded-lg font-medium ${
+                            pageNum === pagination.page
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      pageNum === pagination.page - 2 ||
+                      pageNum === pagination.page + 2
+                    ) {
+                      return <span key={pageNum} className="text-gray-500">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <Button
+                  variant="secondary"
+                  onClick={() => handlePageChange(pagination.page + 1)}
+                  disabled={pagination.page === Math.ceil(pagination.total / pagination.limit)}
+                >
+                  Sau
+                </Button>
               </div>
             )}
           </div>

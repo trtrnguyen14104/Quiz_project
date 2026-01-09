@@ -73,10 +73,6 @@ const TeacherDashboard = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              {/* Notification Button */}
-              <button className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#f0f2f4] dark:bg-[#101922] text-[#111418] dark:text-white min-w-0 px-2.5 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
-                <span className="material-symbols-outlined">Thông báo</span>
-              </button>
               
               {/* User Avatar & Info */}
               <div className="flex gap-3 items-center">
@@ -149,16 +145,26 @@ const TeacherDashboard = () => {
                 <h2 className="text-[#111418] dark:text-white text-xl font-bold">
                   Lớp của tôi
                 </h2>
-                <button 
-                  onClick={() => navigate('/teacher/classes/new')} 
-                  className="flex items-center gap-2 justify-center rounded-lg h-9 px-4 bg-primary/20 text-primary text-sm font-bold hover:bg-primary/30 transition-colors"
-                >
-                  Thêm lớp mới
-                </button>
+                <div className="flex items-center gap-4">
+                  {classes.length > 3 && (
+                    <button
+                      onClick={() => navigate('/teacher/classes')}
+                      className="text-primary dark:text-primary-400 text-sm font-bold hover:underline"
+                    >
+                      Xem tất cả
+                    </button>
+                  )}
+                  <button
+                    onClick={() => navigate('/teacher/classes/new')}
+                    className="flex items-center gap-2 justify-center rounded-lg h-9 px-4 bg-primary/20 text-primary text-sm font-bold hover:bg-primary/30 transition-colors"
+                  >
+                    Thêm lớp mới
+                  </button>
+                </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {classes.map((cls) => (
+                {classes.slice(0, 3).map((cls) => (
                   <div
                     key={cls.class_id}
                     className="bg-white dark:bg-[#18232f] rounded-xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col gap-4 hover:shadow-lg transition-shadow cursor-pointer"
@@ -215,11 +221,21 @@ const TeacherDashboard = () => {
                 <h2 className="text-[#111418] dark:text-white text-xl font-bold">
                   Quiz của tôi
                 </h2>
-                <Button onClick={() => navigate('/teacher/create-quiz')}>
-                  Tạo quiz mới
-                </Button>
+                <div className="flex items-center gap-4">
+                  {quizzes.length > 5 && (
+                    <button
+                      onClick={() => navigate('/teacher/quizzes')}
+                      className="text-primary dark:text-primary-400 text-sm font-bold hover:underline"
+                    >
+                      Xem tất cả
+                    </button>
+                  )}
+                  <Button onClick={() => navigate('/teacher/create-quiz')}>
+                    Tạo quiz mới
+                  </Button>
+                </div>
               </div>
-              
+
               <div className="bg-white dark:bg-[#18232f] rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
@@ -245,7 +261,7 @@ const TeacherDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {quizzes.map((quiz) => (
+                      {quizzes.slice(0, 5).map((quiz) => (
                         <tr
                           key={quiz.quiz_id}
                           className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"

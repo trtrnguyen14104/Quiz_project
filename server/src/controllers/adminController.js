@@ -42,6 +42,38 @@ export const adminController = {
     }
   },
 
+  async createUser(req, res) {
+    try {
+      const { user_name, email, password, role } = req.body;
+
+      if (!user_name || !email || !password || !role) {
+        return res.status(400).json({
+          wasSuccessful: false,
+          message: "Thiếu thông tin bắt buộc"
+        });
+      }
+
+      const result = await adminService.createUser({
+        user_name,
+        email,
+        password,
+        role
+      });
+
+      if (!result.wasSuccessful) {
+        return res.status(400).json(result);
+      }
+
+      res.status(201).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        wasSuccessful: false,
+        message: error.message || "Lỗi tạo người dùng"
+      });
+    }
+  },
+
   async updateUser(req, res) {
     try {
       const { id } = req.params;

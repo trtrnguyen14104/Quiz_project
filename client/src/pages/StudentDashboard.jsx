@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import StudentSidebar from '../components/dashboard/student/StudentSidebar.jsx';
 import Button from '../components/common/Button.jsx';
 import { studentAPI } from '../services/api.js';
+import QuizCard from '../components/quiz/QuizCard.jsx';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -36,58 +37,6 @@ const StudentDashboard = () => {
     console.error('Lỗi load data:', error);
   }
 };
-
-  const QuizCard = ({ quiz }) => {
-    const handleQuizClick = () => {
-      // Always navigate to QuizDescriptionPage
-      navigate(`/student/quiz/${quiz.quiz_id}`);
-    };
-
-    return (
-      <div
-        onClick={handleQuizClick}
-        className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
-      >
-        <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">{quiz.title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-          {quiz.question_count} câu hỏi • {quiz.class_name}
-        </p>
-
-        <div className="flex items-center justify-between mt-4">
-          <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-              quiz.completed
-                ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
-                : 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'
-            }`}
-          >
-            {quiz.completed ? 'Đã làm' : 'Chưa làm'}
-          </span>
-
-          {quiz.completed && quiz.score !== null && quiz.total_score && (
-            <span className="text-sm font-bold text-primary">
-              {((quiz.score / quiz.total_score) * 100).toFixed(1)}%
-            </span>
-          )}
-        </div>
-
-        {quiz.due_date && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-            Hạn: {new Date(quiz.due_date).toLocaleDateString('vi-VN')}
-          </p>
-        )}
-      </div>
-    );
-  };
-
-
-  // if (loading) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <div className="text-center">Loading...</div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="font-display bg-background-light dark:bg-background-dark min-h-screen">
@@ -138,10 +87,15 @@ const StudentDashboard = () => {
                     Xem tất cả
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {assignedQuizzes.length > 0 ? (
-                    assignedQuizzes.map((quiz) => (
-                      <QuizCard key={quiz.quiz_id} quiz={quiz} />
+                    assignedQuizzes.slice(0, 4).map((quiz) => (
+                      <QuizCard
+                        key={quiz.quiz_id}
+                        quiz={quiz}
+                        variant="assigned"
+                        onClick={() => navigate(`/student/quiz/${quiz.quiz_id}`)}
+                      />
                     ))
                   ) : (
                     <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
@@ -153,28 +107,34 @@ const StudentDashboard = () => {
 
               {/* Quiz tham gia gần đây */}
               <div>
-                <h2 className="text-[#111418] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">
-                  Quiz tham gia gần đây
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="flex items-center justify-between pb-3 pt-5">
+                  <h2 className="text-[#111418] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                    Quiz tham gia gần đây
+                  </h2>
+                  {recentlyJoinedQuizzes.length > 4 && (
+                    <button
+                      onClick={() => navigate('/student/my-quizzes')}
+                      className="text-primary dark:text-primary-400 text-sm font-bold hover:underline"
+                    >
+                      Xem tất cả
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {recentlyJoinedQuizzes.length > 0 ? (
-                    recentlyJoinedQuizzes.map((quiz) => (
-                      <div
+                    recentlyJoinedQuizzes.slice(0, 4).map((quiz) => (
+                      <QuizCard
                         key={quiz.quiz_id}
+                        quiz={{
+                          ...quiz,
+                          completed: true,
+                          score: quiz.last_score,
+                          total_score: quiz.max_score,
+                          completed_at: quiz.last_attempt_time
+                        }}
+                        variant="assigned"
                         onClick={() => navigate(`/student/quiz/${quiz.quiz_id}`)}
-                        className="flex flex-col bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 gap-4 cursor-pointer hover:shadow-lg transition-shadow"
-                      >
-                        <h3 className="text-[#111418] dark:text-white text-lg font-bold">{quiz.title}</h3>
-                        <p className="text-[#617589] dark:text-gray-400 text-sm">{quiz.question_count} Câu hỏi</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(quiz.last_attempt_time).toLocaleDateString('vi-VN')}
-                          </span>
-                          <span className="text-lg font-bold text-primary">
-                            {((quiz.last_score / quiz.max_score) * 100).toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
+                      />
                     ))
                   ) : (
                     <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
@@ -192,7 +152,7 @@ const StudentDashboard = () => {
                   <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6">
                     <div className="flow-root">
                       <ul className="divide-y divide-gray-200 dark:divide-white/10">
-                        {results.map((result) => (
+                        {results.slice(0, 5).map((result) => (
                           <li key={result.attempt_id} className="py-3 sm:py-4">
                             <div className="flex items-center space-x-4">
                               <div className="flex-1 min-w-0">
@@ -221,11 +181,21 @@ const StudentDashboard = () => {
                 </div>
 
                 <div className="lg:col-span-2">
-                  <h2 className="text-[#111418] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5">
-                    Lớp đã tham gia
-                  </h2>
+                  <div className="flex items-center justify-between pb-3 pt-5">
+                    <h2 className="text-[#111418] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                      Lớp đã tham gia
+                    </h2>
+                    {classes.length > 4 && (
+                      <button
+                        onClick={() => navigate('/student/classes')}
+                        className="text-primary dark:text-primary-400 text-sm font-bold hover:underline"
+                      >
+                        Xem tất cả
+                      </button>
+                    )}
+                  </div>
                   <div className="flex flex-col gap-4">
-                    {classes.map((cls) => (
+                    {classes.slice(0, 4).map((cls) => (
                       <div
                         key={cls.class_id}
                         className="flex items-center bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-4 gap-4 cursor-pointer hover:shadow-md transition-shadow"

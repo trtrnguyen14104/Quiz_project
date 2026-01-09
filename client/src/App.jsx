@@ -19,17 +19,25 @@
   import QuizTakingPage from './pages/student/QuizTakingPage.jsx';
   import QuizResultPage from './pages/student/QuizResultPage.jsx';
   import StudentClassDetailPage from './pages/student/ClassDetailPage.jsx';
+  import StudentCreateQuizPage from './pages/student/CreateQuizPage.jsx';
+  import StudentEditQuizPage from './pages/student/EditQuizPage.jsx';
 
   // Teacher Pages
   import TeacherDashboard from './pages/TeacherDashboard.jsx';
   import TeacherClassesPage from './pages/teacher/ClassesPage.jsx';
   import TeacherQuizzesPage from './pages/teacher/QuizzesPage.jsx';
   import ReportsPage from './pages/teacher/ReportsPage.jsx';
-  import CreateQuizPage from './pages/teacher/CreateQuizPage.jsx';
+  import TeacherCreateQuizPage from './pages/teacher/CreateQuizPage.jsx';
+  import TeacherEditQuizPage from './pages/teacher/EditQuizPage.jsx';
+  import TeacherQuizDescriptionPage from './pages/teacher/QuizDescriptionPage.jsx';
   import TeacherClassDetailPage from './pages/teacher/ClassDetailPage.jsx';
 
   // Admin Pages
   import AdminDashboard from './pages/AdminDashboard.jsx';
+  import AdminUsersPage from './pages/admin/UsersPage.jsx';
+  import AddUserPage from './pages/admin/AddUserPage.jsx';
+  import AdminQuizzesPage from './pages/admin/QuizzesPage.jsx';
+  import AdminClassesPage from './pages/admin/ClassesPage.jsx';
 
   function App() {
     return (
@@ -129,6 +137,22 @@
               </PrivateRoute>
             }
           />
+          <Route
+            path="/student/create-quiz"
+            element={
+              <PrivateRoute>
+                <StudentCreateQuizPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/student/quiz/:quiz_id/edit"
+            element={
+              <PrivateRoute>
+                <StudentEditQuizPage />
+              </PrivateRoute>
+            }
+          />
 
           {/* Teacher Routes */}
           <Route
@@ -167,7 +191,23 @@
             path="/teacher/create-quiz"
             element={
               <PrivateRoute>
-                <CreateQuizPage />
+                <TeacherCreateQuizPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/quiz/:quiz_id"
+            element={
+              <PrivateRoute>
+                <TeacherQuizDescriptionPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/teacher/quiz/:quiz_id/edit"
+            element={
+              <PrivateRoute>
+                <TeacherEditQuizPage />
               </PrivateRoute>
             }
           />
@@ -186,6 +226,38 @@
             element={
               <PrivateRoute>
                 <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <PrivateRoute>
+                <AdminUsersPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/users/new"
+            element={
+              <PrivateRoute>
+                <AddUserPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/quizzes"
+            element={
+              <PrivateRoute>
+                <AdminQuizzesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin/classes"
+            element={
+              <PrivateRoute>
+                <AdminClassesPage />
               </PrivateRoute>
             }
           />

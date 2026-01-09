@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StudentSidebar from '../../components/dashboard/student/StudentSidebar.jsx';
+import QuizCard from '../../components/quiz/QuizCard.jsx';
 import { studentAPI } from '../../services/api.js';
 
 const ClassDetailPage = () => {
@@ -117,44 +118,12 @@ const ClassDetailPage = () => {
                   </p>
                 ) : (
                   quizzes.map((quiz) => (
-                    <div
+                    <QuizCard
                       key={quiz.quiz_id}
-                      className="bg-white dark:bg-background-dark border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                      quiz={quiz}
+                      variant="assigned"
                       onClick={() => navigate(`/student/quiz/${quiz.quiz_id}`)}
-                    >
-                      <h3 className="text-lg font-bold text-[#111418] dark:text-white mb-2">
-                        {quiz.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {quiz.question_count} câu hỏi • Độ khó: {quiz.difficulty_level}
-                      </p>
-                      {quiz.completed && quiz.score !== null && (
-                        <p className="text-sm font-medium text-primary mb-2">
-                          Điểm: {quiz.score}/{quiz.total_score}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <span
-                          className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                            quiz.completed
-                              ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
-                              : 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'
-                          }`}
-                        >
-                          {quiz.completed ? 'Đã làm' : 'Chưa làm'}
-                        </span>
-                        {quiz.due_date && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            Hạn: {new Date(quiz.due_date).toLocaleDateString('vi-VN')}
-                          </span>
-                        )}
-                      </div>
-                      {quiz.completed && quiz.completed_at && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                          Hoàn thành: {new Date(quiz.completed_at).toLocaleDateString('vi-VN')}
-                        </p>
-                      )}
-                    </div>
+                    />
                   ))
                 )}
               </div>

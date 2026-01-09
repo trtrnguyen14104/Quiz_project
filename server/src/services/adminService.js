@@ -108,7 +108,7 @@ export const adminService = {
       }
 
       const stats = await pool.query(`
-        SELECT 
+        SELECT
           (SELECT COUNT(*) FROM quizzes WHERE creator_id = $1) as created_quizzes,
           (SELECT COUNT(*) FROM quiz_attempts WHERE user_id = $1) as total_attempts,
           (SELECT COUNT(*) FROM class_members WHERE user_id = $1) as joined_classes,
@@ -121,6 +121,45 @@ export const adminService = {
         result: {
           ...user,
           statistics: stats.rows[0],
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  },
+
+  async createUser(userData) {
+    try {
+      const { user_name, email, password, role } = userData;
+
+      const existingUser = await pool.query(
+        "SELECT user_id FROM users WHERE email = $1",
+        [email]
+      );
+
+      if (existingUser.rows.length > 0) {
+        return {
+          wasSuccessful: false,
+          message: "Email đã tồn tại",
+        };
+      }
+
+      const bcrypt = await import('bcryptjs');
+      const password_hash = await bcrypt.hash(password, 10);
+
+      const result = await pool.query(
+        `INSERT INTO users (user_name, email, password_hash, role, status, is_verified)
+         VALUES ($1, $2, $3, $4, 'active', false)
+         RETURNING user_id, user_name, email, role, status, is_verified, created_at`,
+        [user_name, email, password_hash, role]
+      );
+
+      return {
+        wasSuccessful: true,
+        message: "Tạo người dùng thành công",
+        result: {
+          user: result.rows[0],
         },
       };
     } catch (error) {
