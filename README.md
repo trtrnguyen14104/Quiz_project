@@ -41,7 +41,6 @@ npm run dev
 ```
 Frontend sẽ chạy tại: `http://localhost:5173`
 
-
 ## Tài Khoản Mặc Định (Sau Khi Seed Data)
 
 **Quản trị viên:**

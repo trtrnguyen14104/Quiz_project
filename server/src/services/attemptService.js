@@ -1,7 +1,6 @@
 import {QuizAttemptModel} from "../models/QuizAttempt.js";
 import {UserAnswerModel} from "../models/UserAnswer.js";
 import {QuizModel} from "../models/Quiz.js";
-import {QuizConfigModel} from "../models/QuizConfig.js";
 import {AnswerModel} from "../models/Answer.js";
 import {QuestionModel} from "../models/Question.js";
 import {pool} from "../config/database.js";
@@ -16,44 +15,47 @@ export const attemptService = {
         };
       }
 
-      // Kiểm tra quiz config
-      const config = await QuizConfigModel.findByQuiz(quizId);
-      if (config) {
-        const now = new Date();
-        
-        // Kiểm tra thời gian bắt đầu
-        if (config.start_time && new Date(config.start_time) > now) {
-          return {
-            wasSuccessful: false,
-            message: "Quiz chưa bắt đầu",
-          };
-        }
+      // Lấy tất cả attempts của user một lần để tránh gọi nhiều lần
+      let allUserAttempts = await QuizAttemptModel.findByUser(userId);
 
-        // Kiểm tra thời gian kết thúc
-        if (config.end_time && new Date(config.end_time) < now) {
+      // Kiểm tra nếu quiz được gán vào lớp, lấy config từ class_quizzes
+      const classQuizConfigQuery = await pool.query(
+        `SELECT cq.max_attempts, cq.due_date
+         FROM class_quizzes cq
+         JOIN class_members cm ON cq.class_id = cm.class_id
+         WHERE cq.quiz_id = $1 AND cm.user_id = $2 AND cm.status = 'active'
+         LIMIT 1`,
+        [quizId, userId]
+      );
+
+      const classConfig = classQuizConfigQuery.rows[0];
+
+      if (classConfig) {
+        const now = new Date();
+
+        // Kiểm tra thời gian kết thúc (due_date)
+        if (classConfig.due_date && new Date(classConfig.due_date) < now) {
           return {
             wasSuccessful: false,
-            message: "Quiz đã kết thúc",
+            message: "Quiz đã hết hạn nộp",
           };
         }
 
         // Kiểm tra số lần làm - chỉ đếm các attempt đã submitted
-        const previousAttempts = await QuizAttemptModel.findByUser(userId);
-        const submittedAttempts = previousAttempts.filter(
+        const submittedAttempts = allUserAttempts.filter(
           a => a.quiz_id === parseInt(quizId) && a.status === 'submitted'
         );
 
-        if (config.max_attempts && submittedAttempts.length >= config.max_attempts) {
+        if (classConfig.max_attempts && submittedAttempts.length >= classConfig.max_attempts) {
           return {
             wasSuccessful: false,
-            message: `Bạn đã hết số lần làm bài (${config.max_attempts} lần)`,
+            message: `Bạn đã hết số lần làm bài (${classConfig.max_attempts} lần)`,
           };
         }
       }
 
       // Kiểm tra xem có attempt in_progress không, nếu có thì xóa hoặc sử dụng lại
-      const allUserAttempts = await QuizAttemptModel.findByUser(userId);
-      const existingInProgress = allUserAttempts.find(
+      let existingInProgress = allUserAttempts.find(
         a => a.quiz_id === parseInt(quizId) && a.status === 'in_progress'
       );
 
@@ -72,17 +74,36 @@ export const attemptService = {
       );
       const attemptNumber = submittedAttemptsForQuiz.length + 1;
 
-      const newAttempt = await QuizAttemptModel.create({
-        quiz_id: quizId,
-        user_id: userId,
-        attempt_number: attemptNumber,
-      });
+      try {
+        const newAttempt = await QuizAttemptModel.create({
+          quiz_id: quizId,
+          user_id: userId,
+          attempt_number: attemptNumber,
+        });
 
-      return {
-        wasSuccessful: true,
-        message: "Bắt đầu làm quiz",
-        result: newAttempt,
-      };
+        return {
+          wasSuccessful: true,
+          message: "Bắt đầu làm quiz",
+          result: newAttempt,
+        };
+      } catch (createError) {
+        // Nếu bị lỗi duplicate key (có thể do race condition), thử lấy lại attempt đang in_progress
+        if (createError.code === '23505') {
+          allUserAttempts = await QuizAttemptModel.findByUser(userId);
+          existingInProgress = allUserAttempts.find(
+            a => a.quiz_id === parseInt(quizId) && a.status === 'in_progress'
+          );
+
+          if (existingInProgress) {
+            return {
+              wasSuccessful: true,
+              message: "Tiếp tục làm quiz",
+              result: existingInProgress,
+            };
+          }
+        }
+        throw createError;
+      }
     } catch (error) {
       console.error(error);
       throw error;

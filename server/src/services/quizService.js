@@ -1,7 +1,6 @@
 import { QuizModel } from "../models/Quiz.js";
-import {QuestionModel} from "../models/Question.js"; 
+import {QuestionModel} from "../models/Question.js";
 import {AnswerModel} from "../models/Answer.js";
-import {QuizConfigModel} from "../models/QuizConfig.js";
 import { pool } from "../config/database.js";
 import crypto from "crypto";
 
@@ -558,19 +557,6 @@ export const quizService = {
         }
       }
 
-      // Copy config nếu có
-      const config = await QuizConfigModel.findByQuiz(quizId);
-      if (config) {
-        await client.query(
-          `INSERT INTO quiz_configs (
-            quiz_id, start_time, end_time, result_mode, max_attempts,
-            shuffle_questions, shuffle_answers, scoring_scale
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [newQuiz.quiz_id, config.start_time, config.end_time, config.result_mode,
-           config.max_attempts, config.shuffle_questions, config.shuffle_answers, config.scoring_scale]
-        );
-      }
-
       await client.query("COMMIT");
 
       return {
@@ -632,19 +618,13 @@ export const quizService = {
         };
       }
 
-      let config = await QuizConfigModel.findByQuiz(quizId);
-
-      if (!config) {
-        // Tạo config mặc định nếu chưa có
-        config = await QuizConfigModel.create({
-          quiz_id: quizId,
-        });
-      }
-
+      // Quiz config is now part of the quiz itself (result_mode)
       return {
         wasSuccessful: true,
         message: "Lấy cấu hình quiz thành công",
-        result: config,
+        result: {
+          result_mode: quiz.result_mode,
+        },
       };
     } catch (error) {
       console.error(error);
@@ -662,23 +642,17 @@ export const quizService = {
         };
       }
 
-      let config = await QuizConfigModel.findByQuiz(quizId);
-
-      if (!config) {
-        // Tạo mới nếu chưa có
-        config = await QuizConfigModel.create({
-          quiz_id: quizId,
-          ...data,
-        });
-      } else {
-        // Cập nhật
-        config = await QuizConfigModel.update(config.config_id, data);
-      }
+      // Update result_mode in quiz table
+      const updatedQuiz = await QuizModel.update(quizId, {
+        result_mode: data.result_mode,
+      });
 
       return {
         wasSuccessful: true,
         message: "Cập nhật cấu hình quiz thành công",
-        result: config,
+        result: {
+          result_mode: updatedQuiz.result_mode,
+        },
       };
     } catch (error) {
       console.error(error);

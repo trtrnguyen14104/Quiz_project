@@ -5,15 +5,18 @@ export const attemptController = {
     try {
       const { quizId } = req.params;
       const userId = req.user.id; // Từ JWT middleware
-      
+
+      console.log(`[START ATTEMPT] quizId: ${quizId}, userId: ${userId}`);
       const result = await attemptService.startAttempt(quizId, userId);
+      console.log(`[START ATTEMPT RESULT]`, result);
+
       if (!result.wasSuccessful) {
         return res.status(400).json(result);
       }
       res.status(201).json(result);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal server error" });
+      console.error('[START ATTEMPT ERROR]', error);
+      res.status(500).json({ error: "Internal server error", message: error.message });
     }
   },
 

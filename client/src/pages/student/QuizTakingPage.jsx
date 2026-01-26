@@ -57,7 +57,9 @@ const QuizTakingPage = () => {
       }
     } catch (error) {
       console.error('Lỗi khi tải quiz:', error);
-      alert('Không thể tải quiz. Vui lòng thử lại.');
+      console.error('Error response:', error.response?.data);
+      const errorMessage = error.response?.data?.message || 'Không thể tải quiz. Vui lòng thử lại.';
+      alert(errorMessage);
       navigate('/student/dashboard');
     } finally {
       setLoading(false);
