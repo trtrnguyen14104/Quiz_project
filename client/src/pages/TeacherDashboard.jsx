@@ -203,7 +203,7 @@ const TeacherDashboard = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/teacher/class/${cls.class_id}/manage`);
+                          navigate(`/teacher/class/${cls.class_id}`);
                         }}
                         className="flex-1 rounded-lg h-9 px-3 bg-[#f0f2f4] dark:bg-[#101922] text-[#111418] dark:text-white text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
                       >

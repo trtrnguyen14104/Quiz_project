@@ -184,10 +184,11 @@ export const teacherService = {
   async getQuizzes(userId, filters) {
     try {
       const { page = 1, limit = 20, status } = filters;
-      const offset = (page - 1) * limit;
+      const limit_num = parseInt(limit);
+      const offset = (parseInt(page) - 1) * limit_num;
 
       let statusCondition = "";
-      const params = [userId, limit, offset];
+      const params = [userId, limit_num, offset];
 
       if (status) {
         statusCondition = `AND q.status = $4`;
@@ -208,12 +209,14 @@ export const teacherService = {
           s.subject_name,
           t.topic_name,
           (SELECT COUNT(*) FROM questions WHERE quiz_id = q.quiz_id) as question_count,
-          (SELECT COUNT(*) FROM quiz_attempts WHERE quiz_id = q.quiz_id AND status = 'submitted') as attempt_count,
+          (SELECT COUNT(*) FROM quiz_attempts WHERE quiz_id = q.quiz_id AND quiz_attempts.status = 'submitted') as attempt_count,
           (SELECT COALESCE(ROUND(AVG(total_score), 2), 0)
-           FROM quiz_attempts WHERE quiz_id = q.quiz_id AND status = 'submitted') as average_score,
+           FROM quiz_attempts WHERE quiz_id = q.quiz_id AND quiz_attempts.status = 'submitted') as average_score,
           (SELECT class_name FROM classes c
            JOIN class_quizzes cq ON c.class_id = cq.class_id
            WHERE cq.quiz_id = q.quiz_id LIMIT 1) as class_name,
+           (SELECT cq.due_date FROM class_quizzes cq
+          WHERE cq.quiz_id = q.quiz_id LIMIT 1) as due_date,
           q.created_at,
           q.updated_at
         FROM quizzes q
@@ -226,16 +229,19 @@ export const teacherService = {
 
       const result = await pool.query(query, params);
 
-      const countQuery = `
-        SELECT COUNT(*) as total
-        FROM quizzes
-        WHERE creator_id = $1 ${statusCondition}
-      `;
-
+      let countStatusCondition = "";
       const countParams = [userId];
+
       if (status) {
+        countStatusCondition = `AND q.status = $2`;
         countParams.push(status);
       }
+
+      const countQuery = `
+        SELECT COUNT(*) as total
+        FROM quizzes q
+        WHERE creator_id = $1 ${countStatusCondition}
+      `;
 
       const countResult = await pool.query(countQuery, countParams);
 

@@ -51,8 +51,8 @@ const QuizzesPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      graded: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400',
-      live: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400',
+      published: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400',
+      achived: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-400',
       draft: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     };
     return styles[status] || styles.draft;
@@ -60,8 +60,8 @@ const QuizzesPage = () => {
 
   const getStatusText = (status) => {
     const text = {
-      graded: 'Đã chấm',
-      live: 'Đang diễn ra',
+      achived: 'Lưu trữ',
+      published: 'Đã công bố',
       draft: 'Nháp',
     };
     return text[status] || 'Nháp';
@@ -106,14 +106,14 @@ const QuizzesPage = () => {
                 Tất cả
               </button>
               <button
-                onClick={() => handleFilterChange('live')}
+                onClick={() => handleFilterChange('published')}
                 className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${
-                  filter === 'live'
+                  filter === 'published'
                     ? 'bg-blue-600 text-white border-blue-600 shadow-md'
                     : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
-                Đang diễn ra
+                Đã công bố
               </button>
               <button
                 onClick={() => handleFilterChange('draft')}
@@ -126,14 +126,14 @@ const QuizzesPage = () => {
                 Nháp
               </button>
               <button
-                onClick={() => handleFilterChange('graded')}
+                onClick={() => handleFilterChange('achived')}
                 className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${
-                  filter === 'graded'
+                  filter === 'achived'
                     ? 'bg-blue-600 text-white border-blue-600 shadow-md'
                     : 'bg-white dark:bg-[#18232f] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
-                Đã chấm
+                Lưu trữ
               </button>
             </div>
 

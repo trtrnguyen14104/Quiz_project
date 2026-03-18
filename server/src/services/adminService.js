@@ -1,7 +1,6 @@
 import {UserModel} from "../models/User.js";
 import {QuizModel} from "../models/Quiz.js";
 import {ClassModel} from "../models/Class.js";
-import {SystemLogModel} from "../models/SystemLog.js";
 import {pool} from "../config/database.js";
 
 export const adminService = {
@@ -17,7 +16,6 @@ export const adminService = {
           (SELECT COUNT(*) FROM quiz_attempts WHERE start_time >= NOW() - INTERVAL '30 days') as attempts_this_month
       `);
 
-      const recentActivities = await SystemLogModel.findAll(10, 0);
 
       const popularQuizzes = await pool.query(`
         SELECT q.quiz_id, q.title, q.cover_image_url, 
@@ -34,7 +32,6 @@ export const adminService = {
         message: "Lấy thông tin dashboard thành công",
         result: {
           statistics: stats.rows[0],
-          recent_activities: recentActivities,
           popular_quizzes: popularQuizzes.rows,
         },
       };
